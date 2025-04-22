@@ -5,7 +5,7 @@ export interface Job {
   id: number | string;
   company: string;
   title: string;
-  employment_type?: string;
+  employmentType?: string;
   location?: string;
   category?: string;
   work_address?: string;
