@@ -27,6 +27,8 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   handleNext,
 }) => {
   const [hasCollegeInfo, setHasCollegeInfo] = useState(true);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 50 }, (_, i) => (currentYear - i).toString());
 
   useEffect(() => {
     if (formData.highestEducation === "전문대학") {
@@ -163,24 +165,40 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="collegeGPA">학점</Label>
-                    <Input
-                      id="collegeGPA"
-                      name="collegeGPA"
-                      placeholder="학점"
-                      value={formData.collegeGPA}
-                      onChange={handleChange}
-                    />
+                    <Label htmlFor="collegeAdmYear">입학년도</Label>
+                    <Select
+                      value={formData.collegeAdmYear}
+                      onValueChange={(value) => handleSelectChange("collegeAdmYear", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="입학년도 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map((year) => (
+                          <SelectItem key={year} value={year}>
+                            {year}년
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="collegeGradYear">졸업년도</Label>
-                    <Input
-                      id="collegeGradYear"
-                      name="collegeGradYear"
-                      placeholder="졸업년도"
+                    <Select
                       value={formData.collegeGradYear}
-                      onChange={handleChange}
-                    />
+                      onValueChange={(value) => handleSelectChange("collegeGradYear", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="졸업년도 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map((year) => (
+                          <SelectItem key={year} value={year}>
+                            {year}년
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -215,24 +233,40 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="universityGPA">학점</Label>
-                  <Input
-                    id="universityGPA"
-                    name="universityGPA"
-                    placeholder="학점"
-                    value={formData.universityGPA}
-                    onChange={handleChange}
-                  />
+                  <Label htmlFor="universityAdmYear">입학년도</Label>
+                  <Select
+                    value={formData.universityAdmYear}
+                    onValueChange={(value) => handleSelectChange("universityAdmYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="입학년도 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}년
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="universityGradYear">졸업년도</Label>
-                  <Input
-                    id="universityGradYear"
-                    name="universityGradYear"
-                    placeholder="졸업년도"
+                  <Select
                     value={formData.universityGradYear}
-                    onChange={handleChange}
-                  />
+                    onValueChange={(value) => handleSelectChange("universityGradYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="졸업년도 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}년
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -265,24 +299,40 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gradSchoolGPA">학점</Label>
-                  <Input
-                    id="gradSchoolGPA"
-                    name="gradSchoolGPA"
-                    placeholder="학점"
-                    value={formData.gradSchoolGPA}
-                    onChange={handleChange}
-                  />
+                  <Label htmlFor="gradSchoolAdmYear">입학년도</Label>
+                  <Select
+                    value={formData.gradSchoolAdmYear}
+                    onValueChange={(value) => handleSelectChange("gradSchoolAdmYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="입학년도 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}년
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gradSchoolGradYear">졸업년도</Label>
-                  <Input
-                    id="gradSchoolGradYear"
-                    name="gradSchoolGradYear"
-                    placeholder="졸업년도"
+                  <Select
                     value={formData.gradSchoolGradYear}
-                    onChange={handleChange}
-                  />
+                    onValueChange={(value) => handleSelectChange("gradSchoolGradYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="졸업년도 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}년
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
