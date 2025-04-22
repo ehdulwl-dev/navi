@@ -111,7 +111,7 @@ const JobFilters: React.FC<JobFiltersProps> = ({ onFilterChange }) => {
               }`}
             >
               {isAllSelected(selectedJobTypes, jobTypes)
-                ? "모든 직종"
+                ? "직업 선택"
                 : selectedJobTypes.join(", ")}
             </span>
           </div>
@@ -171,7 +171,7 @@ const JobFilters: React.FC<JobFiltersProps> = ({ onFilterChange }) => {
               }`}
             >
               {isAllSelected(selectedRegions, seoulDistricts)
-                ? "전체 지역"
+                ? "지역 선택"
                 : selectedRegions.join(", ")}
             </span>
           </div>
