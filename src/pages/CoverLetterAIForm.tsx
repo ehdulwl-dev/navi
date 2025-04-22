@@ -88,7 +88,7 @@ const CoverLetterAIForm = () => {
   const handleRefreshKeywords = () => {
     if (refreshCount >= MAX_REFRESH_COUNT) {
       toast.error(
-        `키워드는 최대 ${MAX_REFRESH_COUNT}회까지만 새로고침이 가능��니다.`
+        `키워드는 최대 ${MAX_REFRESH_COUNT}회까지만 새로고침이 가능합니다.`
       );
       return;
     }
