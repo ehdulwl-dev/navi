@@ -19,6 +19,7 @@ import ResumeForm from "./pages/ResumeForm";
 import QuestionEditPage from "./pages/QuestionEditPage";
 import { Toaster } from "sonner";
 import ResumeTemplate from "./pages/ResumeTemplate";
+import CoverLetterPreview from "./pages/CoverLetterPreview";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App: React.FC = () => {
               path="/cover-letter/questions/edit"
               element={<QuestionEditPage />}
             />
+            <Route path="/cover-letter/preview" element={<CoverLetterPreview />} />
             <Route path="/job/:id" element={<JobDetail />} />
             <Route path="/jobs/part-time" element={<PartTimeJobs />} />
             <Route path="/jobs/nearby" element={<NearbyJobs />} />
