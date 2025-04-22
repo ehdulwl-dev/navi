@@ -1,138 +1,216 @@
 import React, { useState } from "react";
 import { Briefcase, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface JobFiltersProps {
-  onFilterChange: (filterType: "jobType" | "region", value: string) => void;
+  onFilterChange: (filterType: "jobType" | "region", value: string[]) => void;
 }
 
 const JobFilters: React.FC<JobFiltersProps> = ({ onFilterChange }) => {
-  const [selectedJobType, setSelectedJobType] = useState("all");
-  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 
   const jobTypes = [
-    { value: "all", label: "모든 직종" },
-    { value: "기획·전략", label: "기획·전략" },
-    { value: "마케팅·홍보", label: "마케팅·홍보" },
-    { value: "영업·판매·무역", label: "영업·판매·무역" },
-    { value: "상품기획·MD", label: "상품기획·MD" },
-    { value: "고객상담·TM", label: "고객상담·TM" },
-    { value: "구매·자재·물류", label: "구매·자재·물류" },
-    { value: "건설·건축", label: "건설·건축" },
-    { value: "의료", label: "의료" },
-    { value: "연구·R&D", label: "연구·R&D" },
-    { value: "회계·세무·재무", label: "회계·세무·재무" },
-    { value: "인사·노무·HRD", label: "인사·노무·HRD" },
-    { value: "총무·법무·사무", label: "총무·법무·사무" },
-    { value: "IT개발·데이터", label: "IT개발·데이터" },
-    { value: "디자인", label: "디자인" },
-    { value: "서비스", label: "서비스" },
-    { value: "교육", label: "교육" },
-    { value: "미디어·문화·스포츠", label: "미디어·문화·스포츠" },
-    { value: "금융·보험", label: "금융·보험" },
-    { value: "생산", label: "생산" },
-    { value: "공공·복지", label: "공공·복지" },
-    { value: "운전·운송·배송", label: "운전·운송·배송" },
+    "기획·전략",
+    "마케팅·홍보",
+    "영업·판매·무역",
+    "상품기획·MD",
+    "고객상담·TM",
+    "구매·자재·물류",
+    "건설·건축",
+    "의료",
+    "연구·R&D",
+    "회계·세무·재무",
+    "인사·노무·HRD",
+    "총무·법무·사무",
+    "IT개발·데이터",
+    "디자인",
+    "서비스",
+    "교육",
+    "미디어·문화·스포츠",
+    "금융·보험",
+    "생산",
+    "공공·복지",
+    "운전·운송·배송",
   ];
 
   const seoulDistricts = [
-    { value: "all", label: "전체 지역" },
-    { value: "강남구", label: "강남구" },
-    { value: "강동구", label: "강동구" },
-    { value: "강북구", label: "강북구" },
-    { value: "강서구", label: "강서구" },
-    { value: "관악구", label: "관악구" },
-    { value: "광진구", label: "광진구" },
-    { value: "구로구", label: "구로구" },
-    { value: "금천구", label: "금천구" },
-    { value: "노원구", label: "노원구" },
-    { value: "도봉구", label: "도봉구" },
-    { value: "동대문구", label: "동대문구" },
-    { value: "동작구", label: "동작구" },
-    { value: "마포구", label: "마포구" },
-    { value: "서대문구", label: "서대문구" },
-    { value: "서초구", label: "서초구" },
-    { value: "성동구", label: "성동구" },
-    { value: "성북구", label: "성북구" },
-    { value: "송파구", label: "송파구" },
-    { value: "양천구", label: "양천구" },
-    { value: "영등포구", label: "영등포구" },
-    { value: "용산구", label: "용산구" },
-    { value: "은평구", label: "은평구" },
-    { value: "종로구", label: "종로구" },
-    { value: "중구", label: "중구" },
-    { value: "중랑구", label: "중랑구" },
+    "강남구",
+    "강동구",
+    "강북구",
+    "강서구",
+    "관악구",
+    "광진구",
+    "구로구",
+    "금천구",
+    "노원구",
+    "도봉구",
+    "동대문구",
+    "동작구",
+    "마포구",
+    "서대문구",
+    "서초구",
+    "성동구",
+    "성북구",
+    "송파구",
+    "양천구",
+    "영등포구",
+    "용산구",
+    "은평구",
+    "종로구",
+    "중구",
+    "중랑구",
   ];
+
+  const toggleSelection = (
+    current: string[],
+    setFunc: React.Dispatch<React.SetStateAction<string[]>>,
+    value: string,
+    filterType: "jobType" | "region"
+  ) => {
+    let updated: string[];
+    if (value === "all") {
+      updated = [];
+    } else {
+      updated = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+    }
+    setFunc(updated);
+    onFilterChange(filterType, updated);
+  };
+
+  const isAllSelected = (list: string[], allItems: string[]) =>
+    list.length === 0 || list.length === allItems.length;
+
+  const isActive = (selected: string[]) => selected.length > 0;
 
   return (
     <div className="flex gap-3 w-full max-w-xl mx-auto mb-4">
-      <div
-        className={`flex-1 flex items-center gap-2 rounded-full px-3 h-10 bg-white min-w-0 border-2 ${
-          selectedJobType !== "all" ? "border-app-blue" : "border-gray-300"
-        }`}
-      >
-        <Briefcase
-          size={20}
-          className={`${
-            selectedJobType !== "all" ? "text-app-blue" : "text-gray-400"
-          }`}
-        />
-        <Select
-          value={selectedJobType}
-          onValueChange={(value) => {
-            setSelectedJobType(value);
-            onFilterChange("jobType", value);
-          }}
-        >
-          <SelectTrigger className="border-0 bg-transparent px-0 py-0 h-10 flex-1 text-lg shadow-none focus:ring-0 focus:outline-none">
-            <SelectValue placeholder="직업 선택" />
-          </SelectTrigger>
-          <SelectContent className="max-h-[300px] overflow-y-auto z-[100]">
+      <Popover>
+        <PopoverTrigger asChild>
+          <div
+            className={`flex-1 flex items-center gap-2 rounded-full px-3 h-10 min-w-0 cursor-pointer border-2 ${
+              isActive(selectedJobTypes) ? "border-app-blue" : "border-gray-300"
+            }`}
+          >
+            <Briefcase
+              size={20}
+              className={`${
+                isActive(selectedJobTypes) ? "text-app-blue" : "text-gray-400"
+              }`}
+            />
+            <span
+              className={`flex-1 text-sm truncate ${
+                isActive(selectedJobTypes) ? "text-app-blue" : "text-gray-500"
+              }`}
+            >
+              {isAllSelected(selectedJobTypes, jobTypes)
+                ? "모든 직종"
+                : selectedJobTypes.join(", ")}
+            </span>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[250px] max-h-[300px] overflow-y-auto">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedJobTypes.length === 0}
+                onCheckedChange={() =>
+                  toggleSelection(
+                    selectedJobTypes,
+                    setSelectedJobTypes,
+                    "all",
+                    "jobType"
+                  )
+                }
+              />
+              <span className="text-sm">전체 선택</span>
+            </div>
             {jobTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
-              </SelectItem>
+              <div key={type} className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedJobTypes.includes(type)}
+                  onCheckedChange={() =>
+                    toggleSelection(
+                      selectedJobTypes,
+                      setSelectedJobTypes,
+                      type,
+                      "jobType"
+                    )
+                  }
+                />
+                <span className="text-sm">{type}</span>
+              </div>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div
-        className={`flex-1 flex items-center gap-2 rounded-full px-3 h-10 bg-white min-w-0 border-2 ${
-          selectedRegion !== "all" ? "border-app-blue" : "border-gray-300"
-        }`}
-      >
-        <MapPin
-          size={20}
-          className={`${
-            selectedRegion !== "all" ? "text-app-blue" : "text-gray-400"
-          }`}
-        />
-        <Select
-          value={selectedRegion}
-          onValueChange={(value) => {
-            setSelectedRegion(value);
-            onFilterChange("region", value);
-          }}
-        >
-          <SelectTrigger className="border-0 bg-transparent px-0 py-0 h-10 flex-1 text-lg shadow-none focus:ring-0 focus:outline-none">
-            <SelectValue placeholder="지역별 선택" />
-          </SelectTrigger>
-          <SelectContent className="max-h-[300px] overflow-y-auto z-[100]">
+      <Popover>
+        <PopoverTrigger asChild>
+          <div
+            className={`flex-1 flex items-center gap-2 rounded-full px-3 h-10 min-w-0 cursor-pointer border-2 ${
+              isActive(selectedRegions) ? "border-app-blue" : "border-gray-300"
+            }`}
+          >
+            <MapPin
+              size={20}
+              className={`${
+                isActive(selectedRegions) ? "text-app-blue" : "text-gray-400"
+              }`}
+            />
+            <span
+              className={`flex-1 text-sm truncate ${
+                isActive(selectedRegions) ? "text-app-blue" : "text-gray-500"
+              }`}
+            >
+              {isAllSelected(selectedRegions, seoulDistricts)
+                ? "전체 지역"
+                : selectedRegions.join(", ")}
+            </span>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[250px] max-h-[300px] overflow-y-auto">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedRegions.length === 0}
+                onCheckedChange={() =>
+                  toggleSelection(
+                    selectedRegions,
+                    setSelectedRegions,
+                    "all",
+                    "region"
+                  )
+                }
+              />
+              <span className="text-sm">전체 선택</span>
+            </div>
             {seoulDistricts.map((district) => (
-              <SelectItem key={district.value} value={district.value}>
-                {district.label}
-              </SelectItem>
+              <div key={district} className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedRegions.includes(district)}
+                  onCheckedChange={() =>
+                    toggleSelection(
+                      selectedRegions,
+                      setSelectedRegions,
+                      district,
+                      "region"
+                    )
+                  }
+                />
+                <span className="text-sm">{district}</span>
+              </div>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

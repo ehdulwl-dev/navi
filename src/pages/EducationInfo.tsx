@@ -1,16 +1,21 @@
-
-import React from 'react';
-import { ArrowLeft, School } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getEducationData } from '../services/jobService';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import BottomNavigation from '../components/BottomNavigation';
-import { EducationProgram } from '@/types/job';
+import React from "react";
+import { ArrowLeft, School } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getEducationData } from "../services/jobService";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import BottomNavigation from "../components/BottomNavigation";
+import { EducationProgram } from "@/types/job";
 
 const EducationInfo = () => {
   const { data: educationPrograms, isLoading } = useQuery<EducationProgram[]>({
-    queryKey: ['education'],
+    queryKey: ["education"],
     queryFn: () => getEducationData(),
   });
 
@@ -34,25 +39,37 @@ const EducationInfo = () => {
           <div className="space-y-4">
             {educationPrograms.map((program) => (
               <Card key={program.id}>
-                <CardHeader>
-                  <div className="flex items-center mb-2">
-                    <School className="text-app-blue mr-2" size={20} />
-                    <CardTitle>{program.edc_nm}</CardTitle>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start mb-2">
+                    <School className="text-app-blue mr-2 mt-1" size={20} />
+                    <div>
+                      <CardTitle className="text-lg font-bold leading-snug mb-1">
+                        {program.edc_nm}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-gray-500 leading-relaxed">
+                        {program.provider}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <CardDescription>{program.provider}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <p className="font-medium">상태</p>
+                  <div className="grid grid-cols-2 gap-2 text-sm leading-relaxed">
+                    <div className="mb-1">
+                      <p className="font-medium text-bold text-gray-700">
+                        상태
+                      </p>
                       <p>{program.sttus_nm}</p>
                     </div>
-                    <div>
-                      <p className="font-medium">시작일</p>
+                    <div className="mb-1">
+                      <p className="font-medium text-bold text-gray-700">
+                        시작일
+                      </p>
                       <p>{program.edc_begin_de_dt}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="font-medium">종료일</p>
+                      <p className="font-medium text-bold text-gray-700">
+                        종료일
+                      </p>
                       <p>{program.edc_end_de_dt}</p>
                     </div>
                   </div>
