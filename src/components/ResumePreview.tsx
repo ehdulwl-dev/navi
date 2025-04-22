@@ -141,10 +141,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmi
             <p>{formatComputerSkills()}</p>
           </section>
 
-          <section>
+          {/* <section>
             <h3 className="text-lg font-semibold mb-4">운전 능력</h3>
             <p>{formatDrivingAbility()}</p>
-          </section>
+          </section> */}
 
           <div className="flex justify-end space-x-4 mt-8">
             <Button onClick={() => onSubmit()} className="bg-blue-600 hover:bg-blue-700">
