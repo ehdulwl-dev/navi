@@ -16,6 +16,10 @@ serve(async (req) => {
   }
 
   try {
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY is not set in Supabase environment');
+    }
+
     const { company, position, questions, answers, keywords } = await req.json();
 
     // Prepare system instruction for OpenAI
@@ -41,6 +45,8 @@ serve(async (req) => {
     답변 힌트: ${answers[i] || '정보 없음'}
     `).join('\n')}`;
 
+    console.log("Sending request to OpenAI with prompt:", { system: systemPrompt, user: userPrompt });
+
     // Make the API call to OpenAI
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -49,7 +55,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o-mini", // Updated to a supported model
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -66,6 +72,8 @@ serve(async (req) => {
 
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
+
+    console.log("OpenAI response received successfully");
 
     // Process the generated content to separate answers by question
     let processedContent = [];

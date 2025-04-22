@@ -1,11 +1,8 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   Mic,
   MicOff,
-  Plus,
-  Edit2,
   RefreshCw,
   Volume2,
   Loader2,
@@ -20,7 +17,7 @@ import { toast } from "sonner";
 import { Badge, BadgeVariant } from "@/components/ui/badge";
 import BottomNavigation from "../components/BottomNavigation";
 import { useSpeechSynthesis } from "react-speech-kit";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Keyword {
   id: string;
@@ -41,11 +38,6 @@ const INITIAL_KEYWORDS: Keyword[] = [
   { id: "9", text: "창의성", selected: false, color: "outline" },
   { id: "10", text: "전문성", selected: false, color: "destructive" },
 ];
-
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://YOUR-PROJECT-ID.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR-ANON-KEY';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const CoverLetterAIForm = () => {
   const location = useLocation();
@@ -96,7 +88,7 @@ const CoverLetterAIForm = () => {
   const handleRefreshKeywords = () => {
     if (refreshCount >= MAX_REFRESH_COUNT) {
       toast.error(
-        `키워드는 최대 ${MAX_REFRESH_COUNT}회까지만 새로고침이 가능합니다.`
+        `키워드는 최대 ${MAX_REFRESH_COUNT}회까지만 새로고침이 가능��니다.`
       );
       return;
     }
@@ -234,9 +226,17 @@ const CoverLetterAIForm = () => {
     }
 
     setIsGenerating(true);
-    toast.loading("자기소개서 생성 중입니다...");
+    const toastId = toast.loading("자기소개서 생성 중입니다...");
 
     try {
+      console.log("Calling generate-cover-letter function with:", {
+        company,
+        position,
+        questions: questions.length,
+        answers: answers.length,
+        keywords: selectedKeywords,
+      });
+
       const response = await supabase.functions.invoke("generate-cover-letter", {
         body: {
           company,
@@ -248,10 +248,19 @@ const CoverLetterAIForm = () => {
       });
 
       if (response.error) {
-        throw new Error(response.error.message);
+        console.error("Supabase function error:", response.error);
+        throw new Error(response.error.message || "함수 호출에 실패했습니다.");
       }
 
-      toast.dismiss();
+      if (!response.data) {
+        throw new Error("응답 데이터가 없습니다.");
+      }
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || "자기소개서 생성에 실패했습니다.");
+      }
+
+      toast.dismiss(toastId);
       toast.success("자기소개서가 생성되었습니다!");
       
       localStorage.setItem("hasCoverLetters", "true");
@@ -263,8 +272,8 @@ const CoverLetterAIForm = () => {
       navigate("/cover-letter/preview");
     } catch (error) {
       console.error("Error generating cover letter:", error);
-      toast.dismiss();
-      toast.error("자기소개서 생성 중 오류가 발생했습니다.");
+      toast.dismiss(toastId);
+      toast.error(`자기소개서 생성에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     } finally {
       setIsGenerating(false);
     }
