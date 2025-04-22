@@ -53,7 +53,7 @@ const API = '/api/resumes'; // This will be mocked
 // Mock data storage
 let mockResumes: ResumeData[] = [];
 
-export const getResumes = async () => {
+export const getResumes = async (): Promise<ResumeData[]> => {
   try {
     // Try the real API first
     const response = await axios.get(API);
@@ -65,7 +65,7 @@ export const getResumes = async () => {
   }
 };
 
-export const createResume = async (data: ResumeData) => {
+export const createResume = async (data: ResumeData): Promise<ResumeData> => {
   try {
     // Try the real API first
     const response = await axios.post(API, data);
@@ -84,7 +84,7 @@ export const createResume = async (data: ResumeData) => {
   }
 };
 
-export const updateResume = async (id: string, data: ResumeData) => {
+export const updateResume = async (id: string, data: ResumeData): Promise<ResumeData> => {
   try {
     // Try the real API first
     const response = await axios.put(`${API}/${id}`, data);
@@ -101,7 +101,7 @@ export const updateResume = async (id: string, data: ResumeData) => {
   }
 };
 
-export const deleteResume = async (id: string) => {
+export const deleteResume = async (id: string): Promise<void> => {
   try {
     // Try the real API first
     await axios.delete(`${API}/${id}`);

@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "./ui/card";
 import { PencilLine } from "lucide-react";
 import { Button } from "./ui/button";
-import { createResume } from '../services/resumeService';
+import { createResume, ResumeData } from '../services/resumeService';
 import { toast } from 'sonner';
 
 interface ResumePreviewProps {
-  formData: any;
+  formData: ResumeData;
   onEdit: () => void;
   onSubmit: (e?: React.FormEvent) => void;
 }
