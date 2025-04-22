@@ -20,12 +20,12 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmi
     return skills.join(", ");
   };
 
-  const formatDrivingAbility = () => {
-    const abilities = [];
-    if (formData.drivingAbility.license) abilities.push("운전면허 보유");
-    if (formData.drivingAbility.vehicle) abilities.push("차량 보유");
-    return abilities.join(", ");
-  };
+  // const formatDrivingAbility = () => {
+  //   const abilities = [];
+  //   if (formData.drivingAbility.license) abilities.push("운전면허 보유");
+  //   if (formData.drivingAbility.vehicle) abilities.push("차량 보유");
+  //   return abilities.join(", ");
+  // };
 
   return (
     <Card className="max-w-[800px] mx-auto">
