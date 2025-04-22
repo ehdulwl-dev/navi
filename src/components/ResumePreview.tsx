@@ -19,11 +19,11 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmi
   const handleSave = async () => {
     try {
       toast.loading('이력서를 저장하는 중...');
-      await createResume(formData);
+      const savedResume = await createResume(formData);
       toast.dismiss();
       toast.success('이력서가 저장되었습니다.');
       setTimeout(() => {
-        navigate('/resume');
+        navigate(`/resume/template/${savedResume.id}`);
       }, 1000);
     } catch (error) {
       toast.dismiss();

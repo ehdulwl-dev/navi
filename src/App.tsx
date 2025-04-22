@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import ResumeForm from "./pages/ResumeForm";
 import QuestionEditPage from "./pages/QuestionEditPage";
 import { Toaster } from "sonner";
+import ResumeTemplate from "./pages/ResumeTemplate";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +56,7 @@ const App: React.FC = () => {
             <Route path="/jobs/part-time" element={<PartTimeJobs />} />
             <Route path="/jobs/nearby" element={<NearbyJobs />} />
             <Route path="/education" element={<EducationInfo />} />
+            <Route path="/resume/template/:id" element={<ResumeTemplate />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
