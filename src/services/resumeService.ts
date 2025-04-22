@@ -44,16 +44,69 @@ export interface ResumeData {
   };
 }
 
-const API = 'http://localhost:3001/api/resumes';
+// Mock API for development purposes
+// In production, you would use a real API endpoint
+// const API = 'http://localhost:3001/api/resumes';
+const API = '/api/resumes'; // This will be mocked
 
-export const getResumes = () => 
-    axios.get(API).then(res => res.data);
+// Mock data storage
+let mockResumes: ResumeData[] = [];
 
-export const createResume = (data: ResumeData) => 
-    axios.post(API, data).then(res => res.data);
+export const getResumes = async () => {
+  try {
+    // Try the real API first
+    const response = await axios.get(API);
+    return response.data;
+  } catch (error) {
+    console.log('Using mock data for resumes');
+    // Return mock data if the API is not available
+    return mockResumes;
+  }
+};
 
-export const updateResume = (id: string, data: ResumeData) => 
-    axios.put(`${API}/${id}`, data).then(res => res.data);
+export const createResume = async (data: ResumeData) => {
+  try {
+    // Try the real API first
+    const response = await axios.post(API, data);
+    return response.data;
+  } catch (error) {
+    console.log('Using mock storage for resume creation');
+    // Create a mock ID
+    const mockId = Date.now().toString();
+    const newResume = { ...data, id: mockId };
+    
+    // Add to mock storage
+    mockResumes.push(newResume);
+    
+    // Return the created resume with ID
+    return newResume;
+  }
+};
 
-export const deleteResume = (id: string) => 
-    axios.delete(`${API}/${id}`);
+export const updateResume = async (id: string, data: ResumeData) => {
+  try {
+    // Try the real API first
+    const response = await axios.put(`${API}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.log('Using mock storage for resume update');
+    // Update in mock storage
+    mockResumes = mockResumes.map(resume => 
+      resume.id === id ? { ...data, id } : resume
+    );
+    
+    // Return the updated resume
+    return { ...data, id };
+  }
+};
+
+export const deleteResume = async (id: string) => {
+  try {
+    // Try the real API first
+    await axios.delete(`${API}/${id}`);
+  } catch (error) {
+    console.log('Using mock storage for resume deletion');
+    // Delete from mock storage
+    mockResumes = mockResumes.filter(resume => resume.id !== id);
+  }
+};

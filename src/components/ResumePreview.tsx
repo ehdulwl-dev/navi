@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "./ui/card";
@@ -17,11 +18,16 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmi
 
   const handleSave = async () => {
     try {
+      toast.loading('이력서를 저장하는 중...');
       await createResume(formData);
+      toast.dismiss();
       toast.success('이력서가 저장되었습니다.');
-      navigate('/resume');
+      setTimeout(() => {
+        navigate('/resume');
+      }, 1000);
     } catch (error) {
-      toast.error('이력서 저장에 실패했습니다.');
+      toast.dismiss();
+      toast.error('이력서 저장에 실패했습니다. 나중에 다시 시도해주세요.');
       console.error('Error saving resume:', error);
     }
   };
