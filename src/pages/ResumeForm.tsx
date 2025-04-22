@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,7 +7,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import { createResume } from "../services/resumeService";
+import { createResume, ResumeData } from "../services/resumeService";
 import { PersonalInfoForm } from "../components/resume/PersonalInfoForm";
 import { EducationForm } from "../components/resume/EducationForm";
 import { ExperienceForm } from "../components/resume/ExperienceForm";
@@ -175,8 +176,8 @@ const ResumeForm: React.FC = () => {
       e.preventDefault();
     }
     try {
-      const resumeData = Object.values(formData) as string[];
-      await createResume(resumeData);
+      // Use the formData directly as a ResumeData object instead of casting to string[]
+      await createResume(formData as ResumeData);
       navigate("/resume");
     } catch (error) {
       console.error("Error creating resume:", error);
