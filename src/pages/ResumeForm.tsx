@@ -100,10 +100,10 @@ const ResumeForm: React.FC = () => {
       other: "",
     },
 
-    // drivingAbility: {
-    //   license: false,
-    //   vehicle: false,
-    // },
+    drivingAbility: {
+      license: false,
+      vehicle: false,
+    },
   });
 
   const [formErrors, setFormErrors] = useState({
