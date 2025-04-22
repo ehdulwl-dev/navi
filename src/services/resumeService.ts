@@ -2,6 +2,7 @@
 import axios from 'axios';
 
 export interface ResumeData {
+  id?: string;  // Added id as an optional property
   name: string;
   email: string;
   phone: string;
