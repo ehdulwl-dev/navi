@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const ResumeTemplate = () => {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ const ResumeTemplate = () => {
 
   const handleTemplateSelect = (templateId: string) => {
     // Here you would typically save the template selection
-    // For now, just navigate back to the resume list
+    localStorage.setItem("hasResumes", "true");
+    toast.success("템플릿이 선택되었습니다.");
+    // Navigate back to the resume list
     navigate('/resume');
   };
 
