@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "./ui/card";
 import { PencilLine } from "lucide-react";
 import { Button } from "./ui/button";
+import { createResume } from '../services/resumeService';
+import { toast } from 'sonner';
 
 interface ResumePreviewProps {
   formData: any;
@@ -10,6 +13,19 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmit }) => {
+  const navigate = useNavigate();
+
+  const handleSave = async () => {
+    try {
+      await createResume(formData);
+      toast.success('이력서가 저장되었습니다.');
+      navigate('/resume');
+    } catch (error) {
+      toast.error('이력서 저장에 실패했습니다.');
+      console.error('Error saving resume:', error);
+    }
+  };
+
   const formatComputerSkills = () => {
     const skills = [];
     if (formData.computerSkills.documentCreation) skills.push("문서 작성");
@@ -135,7 +151,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ formData, onEdit, onSubmi
           </section>
 
           <div className="flex justify-end space-x-4 mt-8">
-            <Button onClick={() => onSubmit()} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
               저장
             </Button>
           </div>

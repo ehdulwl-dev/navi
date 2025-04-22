@@ -1,21 +1,59 @@
+
 import axios from 'axios';
+
+export interface ResumeData {
+  name: string;
+  email: string;
+  phone: string;
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
+  address: string;
+  highestEducation: string;
+  university?: string;
+  universityMajor?: string;
+  universityGradYear?: string;
+  college?: string;
+  collegeMajor?: string;
+  collegeGradYear?: string;
+  highSchool?: string;
+  highSchoolGradYear?: string;
+  experiences: Array<{
+    companyName: string;
+    jobTitle: string;
+    customJobTitle?: string;
+    contractType: string;
+    startYear: string;
+    startMonth: string;
+    endYear: string;
+    endMonth: string;
+    responsibilities: string;
+  }>;
+  certificates: Array<{
+    name: string;
+    grade: string;
+    organization: string;
+    issueDate: string;
+  }>;
+  computerSkills: {
+    documentCreation: boolean;
+    spreadsheet: boolean;
+    presentation: boolean;
+    accounting: boolean;
+    other: string;
+  };
+}
 
 const API = 'http://localhost:3001/api/resumes';
 
-//조회
 export const getResumes = () => 
     axios.get(API).then(res => res.data);
 
-//등록
-export const createResume = (data: Array<string>) => 
+export const createResume = (data: ResumeData) => 
     axios.post(API, data).then(res => res.data);
 
-//수정
-export const updateResume = (id: string, data: Array<string>) => 
+export const updateResume = (id: string, data: ResumeData) => 
     axios.put(`${API}/${id}`, data).then(res => res.data);
 
-//삭제
 export const deleteResume = (id: string) => 
     axios.delete(`${API}/${id}`);
-
-
