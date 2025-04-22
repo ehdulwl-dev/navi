@@ -115,8 +115,8 @@ export const SkillsForm: React.FC<SkillsFormProps> = ({
             + 자격증 추가
           </Button>
 
-          <div className="border-t pt-6 mt-6">
-            <h3 className="font-medium text-lg mb-4 ">컴퓨터 활용 능력</h3>
+          <div className="border-t pt-6">
+            <h3 className="font-medium text-lg mb-4">컴퓨터 활용 능력</h3>
 
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -225,45 +225,6 @@ export const SkillsForm: React.FC<SkillsFormProps> = ({
                     className="mt-2"
                   />
                 )}
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t pt-6">
-            <h3 className="font-medium text-lg mb-4">운전 능력</h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="drivingLicense"
-                  checked={formData.drivingAbility.license}
-                  onCheckedChange={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      drivingAbility: {
-                        ...prev.drivingAbility,
-                        license: !prev.drivingAbility.license,
-                      },
-                    }))
-                  }
-                />
-                <Label htmlFor="drivingLicense">운전면허 보유</Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="ownVehicle"
-                  checked={formData.drivingAbility.vehicle}
-                  onCheckedChange={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      drivingAbility: {
-                        ...prev.drivingAbility,
-                        vehicle: !prev.drivingAbility.vehicle,
-                      },
-                    }))
-                  }
-                />
-                <Label htmlFor="ownVehicle">차량 보유</Label>
               </div>
             </div>
           </div>
