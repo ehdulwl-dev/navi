@@ -3,10 +3,9 @@ import {
   ArrowLeft,
   Mic,
   MicOff,
-  Plus,
-  Edit2,
   RefreshCw,
   Volume2,
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { Badge, BadgeVariant } from "@/components/ui/badge";
 import BottomNavigation from "../components/BottomNavigation";
 import { useSpeechSynthesis } from "react-speech-kit";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Keyword {
   id: string;
@@ -38,7 +38,7 @@ const INITIAL_KEYWORDS: Keyword[] = [
   { id: "9", text: "창의성", selected: false, color: "outline" },
   { id: "10", text: "전문성", selected: false, color: "destructive" },
 ];
-// OPENAPI 연결
+
 const CoverLetterAIForm = () => {
   const location = useLocation();
   const jobData = location.state || {};
@@ -49,14 +49,16 @@ const CoverLetterAIForm = () => {
   const [keywords, setKeywords] = useState<Keyword[]>(INITIAL_KEYWORDS);
   const [refreshCount, setRefreshCount] = useState(0);
   const MAX_REFRESH_COUNT = 3;
-  // const [questions, setQuestions] = useState(
-  //   location.state?.questions || [
-  //     "지원 동기에 대하여 말씀해주세요.",
-  //     "관련 경험 또는 유사 활동을 말씀해주세요.",
-  //     "직무 관련 강점에 대해 말씀해주세요.",
-  //   ]
-  // );
   const [isRecording, setIsRecording] = useState(Array(3).fill(false));
+  const [questions, setQuestions] = useState<string[]>(
+    location.state?.questions || [
+      "지원 동기에 대하여 말씀해주세요.",
+      "관련 경험 또는 유사 활동을 말씀해주세요.",
+      "직무 관련 강점에 대해 말씀해주세요.",
+    ]
+  );
+  const [answers, setAnswers] = useState<string[]>(["", "", ""]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
 
   const recognitionRefs = useRef<(SpeechRecognition | null)[]>([
@@ -115,6 +117,12 @@ const CoverLetterAIForm = () => {
     setQuestions(newQuestions);
   };
 
+  const handleAnswerChange = (index: number, value: string) => {
+    const newAnswers = [...answers];
+    newAnswers[index] = value;
+    setAnswers(newAnswers);
+  };
+
   const toggleRecording = (index: number) => {
     stopAllRecordings();
 
@@ -148,7 +156,7 @@ const CoverLetterAIForm = () => {
           .map((result) => result[0].transcript)
           .join("");
 
-        handleQuestionChange(index, transcript);
+        handleAnswerChange(index, transcript);
       };
 
       recognition.onend = () => {
@@ -183,8 +191,6 @@ const CoverLetterAIForm = () => {
     }
   };
 
-  const [questions, setQuestions] = useState<string[]>(["", "", ""]);
-
   const stopAllRecordings = () => {
     recognitionRefs.current.forEach((recognition, index) => {
       if (recognition) {
@@ -194,7 +200,7 @@ const CoverLetterAIForm = () => {
     });
   };
 
-  const handleGenerateCoverLetter = () => {
+  const handleGenerateCoverLetter = async () => {
     if (!company.trim()) {
       toast.error("회사명을 입력해주세요.");
       return;
@@ -205,8 +211,8 @@ const CoverLetterAIForm = () => {
       return;
     }
 
-    if (!questions[0].trim() && !questions[1].trim() && !questions[2].trim()) {
-      toast.error("적어도 하나의 질문을 입력해주세요.");
+    if (answers.every(a => !a.trim())) {
+      toast.error("적어도 하나의 질문에 답변을 입력해주세요.");
       return;
     }
 
@@ -219,12 +225,58 @@ const CoverLetterAIForm = () => {
       return;
     }
 
-    toast.success("자기소개서 생성 중입니다...");
+    setIsGenerating(true);
+    const toastId = toast.loading("자기소개서 생성 중입니다...");
 
-    setTimeout(() => {
+    try {
+      console.log("Calling generate-cover-letter function with:", {
+        company,
+        position,
+        questions: questions.length,
+        answers: answers.length,
+        keywords: selectedKeywords,
+      });
+
+      const response = await supabase.functions.invoke("generate-cover-letter", {
+        body: {
+          company,
+          position,
+          questions,
+          answers,
+          keywords: selectedKeywords,
+        },
+      });
+
+      if (response.error) {
+        console.error("Supabase function error:", response.error);
+        throw new Error(response.error.message || "함수 호출에 실패했습니다.");
+      }
+
+      if (!response.data) {
+        throw new Error("응답 데이터가 없습니다.");
+      }
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || "자기소개서 생성에 실패했습니다.");
+      }
+
+      toast.dismiss(toastId);
+      toast.success("자기소개서가 생성되었습니다!");
+      
       localStorage.setItem("hasCoverLetters", "true");
-      navigate("/cover-letter");
-    }, 2000);
+      
+      // Save generated content to localStorage for now
+      localStorage.setItem("generatedCoverLetter", JSON.stringify(response.data.coverLetter));
+      
+      // Navigate to the cover letter page
+      navigate("/cover-letter/preview");
+    } catch (error) {
+      console.error("Error generating cover letter:", error);
+      toast.dismiss(toastId);
+      toast.error(`자기소개서 생성에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleEditQuestions = () => {
@@ -236,12 +288,6 @@ const CoverLetterAIForm = () => {
       stopAllRecordings();
     };
   }, []);
-
-  const questionPlaceholders = [
-    "지원 동기에 대하여 말씀해주세요.",
-    "관련 경험 또는 유사 활동을 말씀해주세요.",
-    "직무 관련 강점에 대해 말씀해주세요.",
-  ];
 
   const handleSpeak = (text: string) => {
     if (speaking) {
@@ -345,19 +391,19 @@ const CoverLetterAIForm = () => {
         </div>
 
         <div className="space-y-6">
-          {questions.map((answer, index) => (
+          {questions.map((question, index) => (
             <Card key={index} className="relative">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center">
                     <h3 className="text-sm font-bold text-black mr-2">
-                      {questionPlaceholders[index]}
+                      {question}
                     </h3>
                     <Button
                       variant="outline"
                       size="icon"
                       className="h-6 w-6 rounded-md bg-white border border-gray-200 hover:bg-gray-100"
-                      onClick={() => handleSpeak(questionPlaceholders[index])}
+                      onClick={() => handleSpeak(question)}
                     >
                       <Volume2 size={14} className="text-blue-500" />
                     </Button>
@@ -366,9 +412,9 @@ const CoverLetterAIForm = () => {
                 <div className="flex gap-2">
                   <Textarea
                     placeholder="50자 이내로 입력하세요"
-                    value={answer}
+                    value={answers[index]}
                     onChange={(e) =>
-                      handleQuestionChange(index, e.target.value)
+                      handleAnswerChange(index, e.target.value)
                     }
                     maxLength={50}
                     className="resize-none pr-10"
@@ -402,8 +448,16 @@ const CoverLetterAIForm = () => {
           <Button
             className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black"
             onClick={handleGenerateCoverLetter}
+            disabled={isGenerating}
           >
-            자기소개서 생성
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                생성 중...
+              </>
+            ) : (
+              "자기소개서 생성"
+            )}
           </Button>
         </div>
       </main>
