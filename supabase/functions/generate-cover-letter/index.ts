@@ -22,6 +22,19 @@ serve(async (req) => {
 
     const { company, position, questions, answers, keywords } = await req.json();
 
+    // Validate input
+    if (!company || !position || !questions || !answers || !keywords) {
+      throw new Error('Missing required fields in request');
+    }
+
+    console.log("Request received with:", {
+      company,
+      position,
+      questionCount: questions.length,
+      answerCount: answers.length,
+      keywordCount: keywords.length
+    });
+
     // Prepare system instruction for OpenAI
     const systemPrompt = `You are an AI assistant specialized in creating professional cover letters in Korean.
     Generate a detailed, professional cover letter section for each question based on the user's input.
@@ -47,8 +60,7 @@ serve(async (req) => {
 
     console.log("Sending request to OpenAI with:", {
       model: "gpt-4o-mini",
-      systemPrompt,
-      userPrompt
+      messageCount: 2
     });
 
     // Make the API call to OpenAI
@@ -77,7 +89,7 @@ serve(async (req) => {
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
 
-    console.log("OpenAI response received successfully");
+    console.log("OpenAI response received successfully, content length:", generatedContent.length);
 
     // Process the generated content to separate answers by question
     let processedContent = [];
@@ -92,11 +104,13 @@ serve(async (req) => {
     
     // If parsing failed or returned empty, just return the full content for each question
     if (contentSections.length < questions.length) {
+      console.log("Content parsing failed, using full content for each question");
       processedContent = questions.map((_, i) => ({
         question: questions[i],
         answer: generatedContent,
       }));
     } else {
+      console.log("Content successfully parsed into", contentSections.length, "sections");
       processedContent = questions.map((q, i) => ({
         question: q,
         answer: contentSections[i] ? contentSections[i].trim() : generatedContent,
