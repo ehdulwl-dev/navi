@@ -99,9 +99,13 @@ export const getResumes = async (): Promise<ResumeData[]> => {
 export const createResume = async (data: ResumeData): Promise<ResumeData> => {
   try {
     // Try to save to Supabase first
+    // Use 1 as a temporary userid since we don't have real auth yet
+    const tempUserId = 1;
+    
     const { data: newResume, error } = await supabase
       .from('TB_CV_USER')
       .insert({
+        userid: tempUserId, // Add required userid field
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -158,6 +162,9 @@ export const createResume = async (data: ResumeData): Promise<ResumeData> => {
 export const updateResume = async (id: string, data: ResumeData): Promise<ResumeData> => {
   try {
     // Try to update in Supabase first
+    // Convert string id to number for Supabase query
+    const numericId = parseInt(id);
+    
     const { data: updatedResume, error } = await supabase
       .from('TB_CV_USER')
       .update({
@@ -167,7 +174,7 @@ export const updateResume = async (id: string, data: ResumeData): Promise<Resume
         birthdate: `${data.birthYear}-${data.birthMonth}-${data.birthDay}`,
         address: data.address
       })
-      .eq('id', id)
+      .eq('id', numericId)
       .select()
       .single();
       
@@ -216,10 +223,13 @@ export const updateResume = async (id: string, data: ResumeData): Promise<Resume
 export const deleteResume = async (id: string): Promise<void> => {
   try {
     // Try to delete from Supabase first
+    // Convert string id to number for Supabase query
+    const numericId = parseInt(id);
+    
     const { error } = await supabase
       .from('TB_CV_USER')
       .delete()
-      .eq('id', id);
+      .eq('id', numericId);
       
     if (error) throw error;
   } catch (error) {
