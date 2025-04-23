@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toggleFavoriteJob, isJobFavorite } from '@/services/jobService';
-import { toast } from 'sonner';
 
 interface JobCardProps {
   id: string | number;
@@ -44,12 +44,6 @@ const JobCard: React.FC<JobCardProps> = ({
     if (onFavoriteClick) {
       onFavoriteClick(id, newFavoriteState);
     }
-
-    toast(
-      newFavoriteState 
-        ? '관심 공고에 추가되었습니다' 
-        : '관심 공고에서 제거되었습니다'
-    );
   };
 
   const getDeadlineText = (deadline: string | undefined) => {

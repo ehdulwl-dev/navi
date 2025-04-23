@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { Job } from '@/types/job';
 import { EducationProgram } from '@/types/job';
@@ -71,7 +72,15 @@ try {
     };
 
     if (!dbJobs) return [sampleJob];
-    return [sampleJob, ...dbJobs];
+    
+    // 모든 작업이 완료된 후에 isFavorite 상태 설정
+    const jobs = [sampleJob, ...dbJobs];
+    const favoriteIds = getFavoriteJobIds();
+    
+    return jobs.map(job => ({
+      ...job,
+      isFavorite: favoriteIds.includes(job.id.toString())
+    }));
     
   // const res = await axios.get<Job[]>(JOB_API);
   // return res.data.map(job => ({
@@ -142,7 +151,7 @@ export const toggleFavoriteJob = async (jobId: string | number): Promise<boolean
     newFavoriteJobs = [jobIdStr, ...current];
   }
   
-  setFavoriteJobIds(newFavoriteJobs);
+  localStorage.setItem('favoriteJobIds', JSON.stringify(newFavoriteJobs));
   return !current.includes(jobIdStr);
 };
 
@@ -162,7 +171,10 @@ export const isJobFavorite = (jobId: string | number): boolean => {
 export const getFavoriteJobs = async (): Promise<Job[]> => {
   const allJobs = await fetchJobs();
   const favIds = getFavoriteJobIds();
-  return allJobs.filter(job => favIds.includes(job.id.toString()));
+  return allJobs.filter(job => favIds.includes(job.id.toString())).map(job => ({
+    ...job,
+    isFavorite: true
+  }));
 };
 
 // Fetch jobs by category
