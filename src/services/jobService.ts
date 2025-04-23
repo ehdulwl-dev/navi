@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { Job } from '@/types/job';
 import { EducationProgram } from '@/types/job';
@@ -132,14 +131,19 @@ export const getJobById = async (id: string | number): Promise<Job | null> => {
 };
 
 // Toggle favorite status for a job (client-side only for now)
-export const toggleFavoriteJob = async (jobId: string | number): Promise<void> => {
+export const toggleFavoriteJob = async (jobId: string | number): Promise<boolean> => {
   const jobIdStr = jobId.toString();
   const current = getFavoriteJobIds();
+  let newFavoriteJobs: string[];
+  
   if (current.includes(jobIdStr)) {
-    setFavoriteJobIds(current.filter(id => id !== jobIdStr));
+    newFavoriteJobs = current.filter(id => id !== jobIdStr);
   } else {
-    setFavoriteJobIds([jobIdStr, ...current]);
+    newFavoriteJobs = [jobIdStr, ...current];
   }
+  
+  setFavoriteJobIds(newFavoriteJobs);
+  return !current.includes(jobIdStr);
 };
 
 // Get favorite job IDs from localStorage
