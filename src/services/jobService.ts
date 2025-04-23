@@ -174,6 +174,8 @@ export const getFavoriteJobs = async (): Promise<Job[]> => {
   const allJobs = await fetchJobs();
   const favIds = getFavoriteJobIds();
   console.log("getFavoriteJobs: Current favorite IDs:", favIds);
+  
+  // Important: ensure we're returning the latest data
   return allJobs.filter(job => favIds.includes(job.id.toString())).map(job => ({
     ...job,
     isFavorite: true

@@ -48,11 +48,14 @@ const Favorites = () => {
   };
 
   useEffect(() => {
+    // Initial load of favorite jobs
     loadFavoriteJobs();
 
     // 리스트 동기화 (별 클릭시 이벤트)
     const handleFavoritesUpdated = (event: Event) => {
       console.log("Favorites tab: favoritesUpdated event received");
+      
+      // Important: Force reload of favorite jobs when event is triggered
       loadFavoriteJobs();
       
       // Show toast notification
@@ -82,8 +85,11 @@ const Favorites = () => {
 
   // 별(관심) 클릭 핸들러
   const handleToggleFavorite = async (jobId: string | number, isFavorite: boolean) => {
+    console.log(`Favorites: Toggling favorite for job ${jobId}, current state: ${isFavorite}`);
+    
     // toggleFavoriteJob 비동기 호출 후 갱신
     await toggleFavoriteJob(jobId);
+    
     // 즉시 목록 갱신
     await loadFavoriteJobs();
   };
