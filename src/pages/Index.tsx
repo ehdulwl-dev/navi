@@ -43,9 +43,20 @@ const Index = () => {
       if (updatedName) setUserName(updatedName);
     };
 
+    // Listen for favorites updates
+    const handleFavoritesUpdated = () => {
+      // Refetch jobs to update UI with latest favorite status
+      refetch();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+    };
+  }, [refetch]);
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -59,7 +70,7 @@ const Index = () => {
 
   const handleFavoriteToggle = async (jobId: string | number) => {
     await toggleFavoriteJob(jobId);
-    // 관심공고 상태를 UI에 즉시 반영하려면 쿼리를 무효화(새로고침)
+    // Invalidate the jobs query to refresh the UI
     queryClient.invalidateQueries({ queryKey: ["jobs"] });
   };
 
@@ -190,4 +201,3 @@ const TabButton = ({
 );
 
 export default Index;
-

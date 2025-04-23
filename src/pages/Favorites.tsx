@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Star } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
@@ -27,6 +28,17 @@ const Favorites = () => {
 
   useEffect(() => {
     loadFavoriteJobs();
+    
+    // Listen for favorites updates
+    const handleFavoritesUpdated = () => {
+      loadFavoriteJobs();
+    };
+    
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+    
+    return () => {
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+    };
   }, []);
 
   const loadFavoriteJobs = async () => {

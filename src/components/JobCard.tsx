@@ -29,18 +29,26 @@ const JobCard: React.FC<JobCardProps> = ({
   onClick,
   onFavoriteClick
 }) => {
-  const [isFavoriteState, setIsFavoriteState] = useState(isJobFavorite(id));
+  // Initialize with both passed prop and actual storage state
+  const [isFavoriteState, setIsFavoriteState] = useState<boolean>(
+    isFavorite || isJobFavorite(id)
+  );
 
+  // Update state when props change
   useEffect(() => {
-    setIsFavoriteState(isJobFavorite(id));
-  }, [id]);
+    setIsFavoriteState(isFavorite || isJobFavorite(id));
+  }, [id, isFavorite]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Toggle favorite in storage and get new state
     const newFavoriteState = await toggleFavoriteJob(id);
     
+    // Update local state
     setIsFavoriteState(newFavoriteState);
     
+    // Notify parent component
     if (onFavoriteClick) {
       onFavoriteClick(id, newFavoriteState);
     }
