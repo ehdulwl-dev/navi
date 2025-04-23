@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { Job } from '@/types/job';
 import { EducationProgram } from '@/types/job';
@@ -135,11 +134,19 @@ export const getJobById = async (id: string | number): Promise<Job | null> => {
 export const toggleFavoriteJob = async (jobId: string | number): Promise<void> => {
   const jobIdStr = jobId.toString();
   const current = getFavoriteJobIds();
+  let isNowFavorite: boolean;
   if (current.includes(jobIdStr)) {
     setFavoriteJobIds(current.filter(id => id !== jobIdStr));
+    isNowFavorite = false;
   } else {
     setFavoriteJobIds([jobIdStr, ...current]);
+    isNowFavorite = true;
   }
+
+  // 커스텀 이벤트 브로드캐스트 (관심공고 갱신 알림)
+  window.dispatchEvent(new CustomEvent('favoritesUpdated', {
+    detail: { jobId: jobIdStr, isFavorite: isNowFavorite },
+  }));
 };
 
 // Get favorite job IDs from localStorage

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Star } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -25,11 +25,7 @@ const Favorites = () => {
     navigate('/', { state: { activeTab: 'all' } });
   };
 
-  useEffect(() => {
-    loadFavoriteJobs();
-  }, []);
-
-  const loadFavoriteJobs = async () => {
+  const loadFavoriteJobs = useCallback(async () => {
     try {
       setLoading(true);
       const favorites = await getFavoriteJobs();
@@ -46,7 +42,21 @@ const Favorites = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadFavoriteJobs();
+  }, [loadFavoriteJobs]);
+
+  useEffect(() => {
+    const handler = () => {
+      loadFavoriteJobs();
+    };
+    window.addEventListener('favoritesUpdated', handler);
+    return () => {
+      window.removeEventListener('favoritesUpdated', handler);
+    };
+  }, [loadFavoriteJobs]);
 
   const handleRefresh = () => {
     setRefreshing(true);
