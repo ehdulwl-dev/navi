@@ -10,6 +10,8 @@ import { Job } from "../components/JobList";
 const NearbyJobs = () => {
   const [locationText, setLocationText] =
     useState("위치 정보를 불러오는 중...");
+  const [district, setDistrict] = useState(""); // 구 이름 저장용
+
   const { data: jobs, isLoading } = useQuery<Job[]>({
     queryKey: ["jobs", "nearby"],
     queryFn: () => getJobsByType("nearby"),
@@ -29,10 +31,17 @@ const NearbyJobs = () => {
           }
         );
         const data = await res.json();
-        const region = data.documents[0];
-        setLocationText(
-          `${region.region_1depth_name} ${region.region_2depth_name} ${region.region_3depth_name} 까지`
-        );
+
+        if (data.documents && data.documents.length > 0) {
+          const region = data.documents[0];
+          const fullAddress = `${region.region_1depth_name} ${region.region_2depth_name}`;
+          const districtName = region.region_2depth_name;
+          setLocationText(fullAddress);
+          setDistrict(districtName); // 예: "서초구"
+        } else {
+          console.warn("주소를 찾을 수 없습니다.", data);
+          setLocationText("주소를 찾을 수 없습니다.");
+        }
       } catch (err) {
         console.error("주소 변환 실패:", err);
         setLocationText("주소 변환 실패");
@@ -54,6 +63,11 @@ const NearbyJobs = () => {
       setLocationText("이 브라우저에서는 위치 정보를 사용할 수 없습니다.");
     }
   }, []);
+
+  // 필터링된 공고
+  const filteredJobs = jobs?.filter((job) =>
+    district ? job.location.includes(district) : true
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -77,9 +91,9 @@ const NearbyJobs = () => {
       <main className="px-4 py-6">
         {isLoading ? (
           <p className="text-center py-4">로딩 중...</p>
-        ) : jobs && jobs.length > 0 ? (
+        ) : filteredJobs && filteredJobs.length > 0 ? (
           <div className="space-y-4">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <JobCard
                 key={job.id}
                 id={job.id}
