@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Star } from 'lucide-react';
+import { Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,7 @@ const Favorites = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/', { state: { activeTab: 'all' } });
+    navigate("/", { state: { activeTab: "all" } });
   };
 
   // 관심공고 불러오기
@@ -54,7 +53,7 @@ const Favorites = () => {
     const handleFavoritesUpdated = (event: Event) => {
       console.log("Favorites tab: favoritesUpdated event received");
       loadFavoriteJobs();
-      
+
       // Show toast notification
       const detail = (event as CustomEvent)?.detail;
       if (detail?.isFavorite) {
@@ -80,11 +79,11 @@ const Favorites = () => {
     }, 1000);
   };
 
-  // 별(관심) 클릭 핸들러
-  const handleToggleFavorite = async (jobId: string | number, isFavorite: boolean) => {
-    // toggleFavoriteJob 비동기 호출 후 갱신
+  const handleToggleFavorite = async (
+    jobId: string | number,
+    isFavorite: boolean
+  ) => {
     await toggleFavoriteJob(jobId);
-    // 즉시 목록 갱신
     await loadFavoriteJobs();
   };
 

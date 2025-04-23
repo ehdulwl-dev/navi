@@ -50,7 +50,7 @@ const Index = () => {
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-    
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
@@ -69,8 +69,14 @@ const Index = () => {
 
   const handleFavoriteToggle = async (jobId: string | number) => {
     await toggleFavoriteJob(jobId);
+    const isFavorite = await toggleFavoriteJob(jobId);
     // Invalidate the jobs query to refresh the UI
     queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    window.dispatchEvent(
+      new CustomEvent("favoritesUpdated", {
+        detail: { jobId, isFavorite },
+      })
+    );
   };
 
   const handleFilterChange = (

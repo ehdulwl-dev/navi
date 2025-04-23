@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({
           </button>
           <h1 className="text-xl font-bold">{title}</h1>
         </div>
-
+        {/* 
         {onRefresh ? (
           <Button
             variant="ghost"
@@ -48,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({
           </Button>
         ) : (
           <div className="w-6" /> // 버튼 없을 때 공간 유지용
-        )}
+        )} */}
       </div>
 
       {subText && <div className="text-center text-gray-500">{subText}</div>}

@@ -1,8 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
-import { Star } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toggleFavoriteJob, isJobFavorite } from '@/services/jobService';
+import { toggleFavoriteJob, isJobFavorite } from "@/services/jobService";
+import { toast } from "sonner";
 
 interface JobCardProps {
   id: string | number;
@@ -27,7 +27,7 @@ const JobCard: React.FC<JobCardProps> = ({
   deadline,
   isFavorite = false,
   onClick,
-  onFavoriteClick
+  onFavoriteClick,
 }) => {
   // Initialize with both passed prop and actual storage state
   const [isFavoriteState, setIsFavoriteState] = useState<boolean>(
@@ -40,20 +40,27 @@ const JobCard: React.FC<JobCardProps> = ({
   }, [id, isFavorite]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    // Toggle favorite in storage and get new state
+    e.stopPropagation(); // 카드 클릭 방지
+
     const newFavoriteState = await toggleFavoriteJob(id);
-    
-    // Update local state
-    setIsFavoriteState(newFavoriteState);
-    
-    // Log for debugging
-    console.log(`JobCard: Toggled job ${id} favorite status to ${newFavoriteState}`);
-    
-    // Notify parent component
+    setIsFavoriteState(newFavoriteState); // UI 반영
+
+    // 상위 컴포넌트로 알림
     if (onFavoriteClick) {
       onFavoriteClick(id, newFavoriteState);
+    }
+
+    // 관심공고 이벤트 전파
+    const event = new CustomEvent("favoritesUpdated", {
+      detail: { isFavorite: newFavoriteState },
+    });
+    window.dispatchEvent(event);
+    // Show toast notification
+    const detail = (event as CustomEvent)?.detail;
+    if (detail?.isFavorite) {
+      toast.success("관심 공고에 추가되었습니다");
+    } else {
+      toast.info("관심 공고에서 제거되었습니다");
     }
   };
 
@@ -75,7 +82,7 @@ const JobCard: React.FC<JobCardProps> = ({
   };
 
   return (
-    <article 
+    <article
       onClick={onClick}
       className="relative bg-white border-2 border-gray-200 rounded-2xl p-5 cursor-pointer hover:shadow transition"
     >
@@ -88,7 +95,9 @@ const JobCard: React.FC<JobCardProps> = ({
           size={24}
           className={cn(
             "transition-colors",
-            isFavoriteState ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+            isFavoriteState
+              ? "fill-yellow-400 text-yellow-400"
+              : "text-gray-300"
           )}
         />
       </button>
@@ -97,9 +106,7 @@ const JobCard: React.FC<JobCardProps> = ({
           <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
             {title}
           </h3>
-          <p className="text-gray-600 font-medium">
-            {company}
-          </p>
+          <p className="text-gray-600 font-medium">{company}</p>
           {category && (
             <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mt-2">
               {category}
@@ -108,7 +115,7 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
         <div className="flex flex-col items-end">
           {highlight && (
-            <span 
+            <span
               className={cn(
                 "text-base font-bold",
                 highlight.includes("D-") ? "text-[#ea384c]" : "text-[#0EA5E9]"
