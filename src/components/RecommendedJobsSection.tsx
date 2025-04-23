@@ -86,7 +86,7 @@ const RecommendedJobsSection: React.FC<RecommendedJobsSectionProps> = ({
           <article className="bg-white rounded-xl overflow-hidden shadow-sm mb-4 cursor-pointer hover:shadow-md transition-all">
             <div className="px-2">
               <h2 className="text-xl font-bold text-gray-900 py-2 px-2 rounded-xl mb-2 bg-green-100 w-full truncate">
-                🏡 집에서 가까운 모집 공고
+                🏡 가까운 모집 공고
               </h2>
             </div>
             <div className="relative">
