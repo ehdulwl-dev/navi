@@ -59,7 +59,7 @@ serve(async (req) => {
     `).join('\n')}`;
 
     console.log("Sending request to OpenAI with:", {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messageCount: 2
     });
 
@@ -71,7 +71,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
