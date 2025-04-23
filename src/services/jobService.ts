@@ -145,6 +145,9 @@ export const toggleFavoriteJob = async (jobId: string | number): Promise<boolean
   // Update localStorage
   localStorage.setItem('favoriteJobIds', JSON.stringify(newFavoriteJobs));
   
+  // Add debug log
+  console.log(`jobService: Dispatching favoritesUpdated event for job ${jobIdStr}, isFavorite=${newState}`);
+  
   // Dispatch a custom event to notify other components of the change
   window.dispatchEvent(new CustomEvent('favoritesUpdated', { 
     detail: { jobId: jobIdStr, isFavorite: newState }
@@ -167,8 +170,10 @@ export const isJobFavorite = (jobId: string | number): boolean => {
 
 // Get only favorite jobs (client-side filtering)
 export const getFavoriteJobs = async (): Promise<Job[]> => {
+  console.log("getFavoriteJobs: Fetching favorite jobs");
   const allJobs = await fetchJobs();
   const favIds = getFavoriteJobIds();
+  console.log("getFavoriteJobs: Current favorite IDs:", favIds);
   return allJobs.filter(job => favIds.includes(job.id.toString())).map(job => ({
     ...job,
     isFavorite: true

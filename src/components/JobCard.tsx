@@ -48,6 +48,9 @@ const JobCard: React.FC<JobCardProps> = ({
     // Update local state
     setIsFavoriteState(newFavoriteState);
     
+    // Log for debugging
+    console.log(`JobCard: Toggled job ${id} favorite status to ${newFavoriteState}`);
+    
     // Notify parent component
     if (onFavoriteClick) {
       onFavoriteClick(id, newFavoriteState);
@@ -79,6 +82,7 @@ const JobCard: React.FC<JobCardProps> = ({
       <button
         onClick={handleFavoriteClick}
         className="absolute top-4 left-4 hover:scale-110 transition"
+        aria-label={isFavoriteState ? "관심 공고에서 제거" : "관심 공고에 추가"}
       >
         <Star
           size={24}

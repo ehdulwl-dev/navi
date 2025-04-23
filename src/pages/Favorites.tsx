@@ -10,6 +10,7 @@ import BottomNavigation from "../components/BottomNavigation";
 import { getFavoriteJobs, toggleFavoriteJob } from "../services/jobService";
 import { getMockMatchAnalysis } from "../services/matchingService";
 import Header from "@/components/Header";
+import { toast } from "sonner";
 
 const Favorites = () => {
   const [favoriteJobs, setFavoriteJobs] = useState<Job[]>([]);
@@ -50,10 +51,20 @@ const Favorites = () => {
     loadFavoriteJobs();
 
     // 리스트 동기화 (별 클릭시 이벤트)
-    const handleFavoritesUpdated = () => {
+    const handleFavoritesUpdated = (event: Event) => {
+      console.log("Favorites tab: favoritesUpdated event received");
       loadFavoriteJobs();
+      
+      // Show toast notification
+      const detail = (event as CustomEvent)?.detail;
+      if (detail?.isFavorite) {
+        toast.success("관심 공고에 추가되었습니다");
+      } else {
+        toast.info("관심 공고에서 제거되었습니다");
+      }
     };
 
+    // Global event listener
     window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
 
     return () => {
@@ -73,6 +84,7 @@ const Favorites = () => {
   const handleToggleFavorite = async (jobId: string | number, isFavorite: boolean) => {
     // toggleFavoriteJob 비동기 호출 후 갱신
     await toggleFavoriteJob(jobId);
+    // 즉시 목록 갱신
     await loadFavoriteJobs();
   };
 
@@ -94,6 +106,7 @@ const Favorites = () => {
         title="관심 공고"
         refreshing={refreshing}
         onBack={handleBack}
+        onRefresh={handleRefresh}
       />
 
       <main className="px-4 py-2">
