@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -58,6 +59,8 @@ const Index = () => {
 
   const handleFavoriteToggle = async (jobId: string | number) => {
     await toggleFavoriteJob(jobId);
+    // 관심공고 상태를 UI에 즉시 반영하려면 쿼리를 무효화(새로고침)
+    queryClient.invalidateQueries({ queryKey: ["jobs"] });
   };
 
   const handleFilterChange = (
@@ -187,3 +190,4 @@ const TabButton = ({
 );
 
 export default Index;
+
