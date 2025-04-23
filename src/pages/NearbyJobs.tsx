@@ -1,18 +1,59 @@
-
-import React from 'react';
-import { ArrowLeft, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getJobsByType } from '../services/jobService';
-import JobCard from '../components/JobCard';
-import BottomNavigation from '../components/BottomNavigation';
-import { Job } from '../components/JobList';
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getJobsByType } from "../services/jobService";
+import JobCard from "../components/JobCard";
+import BottomNavigation from "../components/BottomNavigation";
+import { Job } from "../components/JobList";
 
 const NearbyJobs = () => {
+  const [locationText, setLocationText] =
+    useState("위치 정보를 불러오는 중...");
   const { data: jobs, isLoading } = useQuery<Job[]>({
-    queryKey: ['jobs', 'nearby'],
-    queryFn: () => getJobsByType('nearby'),
+    queryKey: ["jobs", "nearby"],
+    queryFn: () => getJobsByType("nearby"),
   });
+
+  useEffect(() => {
+    const fetchAddress = async (lat: number, lng: number) => {
+      try {
+        const res = await fetch(
+          `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
+          {
+            headers: {
+              Authorization: `KakaoAK ${
+                import.meta.env.VITE_KAKAO_REST_API_KEY
+              }`,
+            },
+          }
+        );
+        const data = await res.json();
+        const region = data.documents[0];
+        setLocationText(
+          `${region.region_1depth_name} ${region.region_2depth_name} ${region.region_3depth_name} 까지`
+        );
+      } catch (err) {
+        console.error("주소 변환 실패:", err);
+        setLocationText("주소 변환 실패");
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchAddress(latitude, longitude);
+        },
+        (error) => {
+          console.error(error);
+          setLocationText("위치 정보를 가져올 수 없습니다.");
+        }
+      );
+    } else {
+      setLocationText("이 브라우저에서는 위치 정보를 사용할 수 없습니다.");
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -29,7 +70,7 @@ const NearbyJobs = () => {
       {/* Location Section */}
       <div className="bg-white p-4 mb-4 flex items-center">
         <MapPin className="text-app-blue mr-2" size={20} />
-        <span>현재 위치: 서울특별시 서초구</span>
+        <span>현재 위치: {locationText}</span>
       </div>
 
       {/* Main Content */}
@@ -39,7 +80,7 @@ const NearbyJobs = () => {
         ) : jobs && jobs.length > 0 ? (
           <div className="space-y-4">
             {jobs.map((job) => (
-              <JobCard 
+              <JobCard
                 key={job.id}
                 id={job.id}
                 title={job.title}

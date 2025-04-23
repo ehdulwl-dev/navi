@@ -4,7 +4,7 @@ import { EducationProgram } from "@/types/job";
 import { fetchJobsFromDB } from "./supabaseClient";
 
 // Add the missing constant
-const EDUCATION_API = "http://localhost:3001/api/educations"; // Placeholder URL
+const EDUCATION_API = "http://localhost:3001/api/educations";
 
 // Convert DB job entry to our Job format
 const convertDBJobToJobFormat = (dbJob: any): Job => {
