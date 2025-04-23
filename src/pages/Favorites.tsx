@@ -26,21 +26,7 @@ const Favorites = () => {
     navigate('/', { state: { activeTab: 'all' } });
   };
 
-  useEffect(() => {
-    loadFavoriteJobs();
-    
-    // Listen for favorites updates
-    const handleFavoritesUpdated = () => {
-      loadFavoriteJobs();
-    };
-    
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-    
-    return () => {
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-    };
-  }, []);
-
+  // 관심공고 불러오기
   const loadFavoriteJobs = async () => {
     try {
       setLoading(true);
@@ -60,6 +46,21 @@ const Favorites = () => {
     }
   };
 
+  useEffect(() => {
+    loadFavoriteJobs();
+
+    // 리스트 동기화 (별 클릭시 이벤트)
+    const handleFavoritesUpdated = () => {
+      loadFavoriteJobs();
+    };
+
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+
+    return () => {
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+    };
+  }, []);
+
   const handleRefresh = () => {
     setRefreshing(true);
     loadFavoriteJobs();
@@ -68,14 +69,11 @@ const Favorites = () => {
     }, 1000);
   };
 
-  const handleToggleFavorite = (jobId: string | number) => {
-    toggleFavoriteJob(jobId);
-    setFavoriteJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
-    setJobScores((prevScores) => {
-      const newScores = { ...prevScores };
-      delete newScores[jobId];
-      return newScores;
-    });
+  // 별(관심) 클릭 핸들러
+  const handleToggleFavorite = async (jobId: string | number, isFavorite: boolean) => {
+    // toggleFavoriteJob 비동기 호출 후 갱신
+    await toggleFavoriteJob(jobId);
+    await loadFavoriteJobs();
   };
 
   const filteredJobs = searchQuery
@@ -127,7 +125,7 @@ const Favorites = () => {
                 </Link>
                 <button
                   className="absolute top-1/2 -translate-y-1/2 left-3"
-                  onClick={() => handleToggleFavorite(job.id)}
+                  onClick={() => handleToggleFavorite(job.id, true)}
                   aria-label="관심 공고에서 제거"
                 >
                   <Star
@@ -158,3 +156,4 @@ const Favorites = () => {
 };
 
 export default Favorites;
+
