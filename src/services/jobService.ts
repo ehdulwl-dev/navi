@@ -1,37 +1,41 @@
-import axios from 'axios';
-import { Job } from '@/types/job';
-import { EducationProgram } from '@/types/job';
-import { fetchJobsFromDB } from './supabaseClient';
+import axios from "axios";
+import { Job } from "@/types/job";
+import { EducationProgram } from "@/types/job";
+import { fetchJobsFromDB } from "./supabaseClient";
 
 // Add the missing constant
-const EDUCATION_API = 'https://api.example.com/educations'; // Placeholder URL
+const EDUCATION_API = "http://localhost:3001/api/educations"; // Placeholder URL
 
 // Convert DB job entry to our Job format
 const convertDBJobToJobFormat = (dbJob: any): Job => {
   const locationMatch = dbJob.work_location?.match(/서울특별시\s*([^\s]+구)/);
-  const location = locationMatch ? locationMatch[0] : (dbJob.company_address || '서울');
-  const deadline = !dbJob.closing_date ? '상시채용' : dbJob.closing_date;
-  let highlight = '';
-  if (deadline !== '상시채용') {
+  const location = locationMatch
+    ? locationMatch[0]
+    : dbJob.company_address || "서울";
+  const deadline = !dbJob.closing_date ? "상시채용" : dbJob.closing_date;
+  let highlight = "";
+  if (deadline !== "상시채용") {
     try {
       const deadlineDate = new Date(deadline);
       const today = new Date();
-      const daysLeft = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const daysLeft = Math.ceil(
+        (deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
       if (daysLeft <= 3 && daysLeft > 0) {
         highlight = `D-${daysLeft}`;
       }
-    } catch (e) { }
+    } catch (e) {}
   }
   return {
-    id: dbJob.id || dbJob.regist_no || dbJob.JO_REGIST_NO || '', // Add fallback for Seoul API
-    title: dbJob.job_title || dbJob.JO_SJ || '',
-    company: dbJob.company_name || dbJob.CMPNY_NM || '',
+    id: dbJob.id || dbJob.regist_no || dbJob.JO_REGIST_NO || "", // Add fallback for Seoul API
+    title: dbJob.job_title || dbJob.JO_SJ || "",
+    company: dbJob.company_name || dbJob.CMPNY_NM || "",
     location: location,
     deadline: deadline,
-    employmentType: dbJob.employment_type_name || dbJob.EMPLYM_STLE || '정규직',
-    category: dbJob.job_type_name || dbJob.EMPLYM_STLE || '일반',
+    employmentType: dbJob.employment_type_name || dbJob.EMPLYM_STLE || "정규직",
+    category: dbJob.job_type_name || dbJob.EMPLYM_STLE || "일반",
     isFavorite: false,
-    description: dbJob.job_description || '',
+    description: dbJob.job_description || "",
     highlight: highlight,
   };
 };
@@ -40,16 +44,16 @@ const convertDBJobToJobFormat = (dbJob: any): Job => {
 export const fetchJobs = async (): Promise<Job[]> => {
   try {
     const dbJobs = await fetchJobsFromDB();
-    
+
     // Add sample visiting nurse job posting
     const sampleJob: Job = {
-      id: 'VN001',
-      title: '방문간호사 모집 (파트타임)',
-      company: '주식회사 웰케어스테이션',
-      location: '서울 강남구',
-      category: '파트타임',
-      employmentType: '시간제',
-      deadline: '2025-05-22',
+      id: "VN001",
+      title: "방문간호사 모집 (파트타임)",
+      company: "주식회사 웰케어스테이션",
+      location: "서울 강남구",
+      category: "파트타임",
+      employmentType: "시간제",
+      deadline: "2025-05-22",
       description: `[주요업무]
 - 재가환자 방문간호 서비스 제공
 - 환자 건강상태 체크 및 기록
@@ -66,23 +70,23 @@ export const fetchJobs = async (): Promise<Job[]> => {
 - 교통비 별도 지급
 - 4대보험 가입`,
       isFavorite: false,
-      highlight: 'D-30'
+      highlight: "D-30",
     };
 
     if (!dbJobs) return [sampleJob];
-    
+
     // Get current favorite IDs from localStorage
     const favoriteIds = getFavoriteJobIds();
-    
+
     // Add sample job and set isFavorite property based on localStorage
-    const jobs = [sampleJob, ...dbJobs].map(job => ({
+    const jobs = [sampleJob, ...dbJobs].map((job) => ({
       ...job,
-      isFavorite: favoriteIds.includes(job.id.toString())
+      isFavorite: favoriteIds.includes(job.id.toString()),
     }));
-    
+
     return jobs;
   } catch (error) {
-    console.error('Supabase/백엔드 구직 공고 로드 실패:', error);
+    console.error("Supabase/백엔드 구직 공고 로드 실패:", error);
     return [];
   }
 };
@@ -92,12 +96,12 @@ export const getJobsByType = async (type: string): Promise<Job[]> => {
   const allJobs = await fetchJobs();
 
   switch (type) {
-  case 'part-time':
-        return allJobs.filter(job => job.employmentType?.includes('시간제'));
-  case 'nearby':
-    return allJobs.filter(job => job.location?.includes('서울'));
-  default:
-    return allJobs;
+    case "part-time":
+      return allJobs.filter((job) => job.employmentType?.includes("시간제"));
+    case "nearby":
+      return allJobs.filter((job) => job.location?.includes("서울"));
+    default:
+      return allJobs;
   }
 };
 
@@ -105,9 +109,10 @@ export const getJobsByType = async (type: string): Promise<Job[]> => {
 export const getEducationData = async (): Promise<EducationProgram[]> => {
   try {
     const res = await axios.get<EducationProgram[]>(EDUCATION_API);
+    console.log("교육 응답:", res.data);
     return res.data;
   } catch (error) {
-    console.error('Error fetching education data:', error);
+    console.error("Error fetching education data:", error);
     return [];
   }
 };
@@ -121,44 +126,50 @@ export const getRecommendedJobs = async (userId: number): Promise<Job[]> => {
 // Get a job by ID
 export const getJobById = async (id: string | number): Promise<Job | null> => {
   const allJobs = await fetchJobs();
-  const job = allJobs.find(job => job.id.toString() === id.toString());
+  const job = allJobs.find((job) => job.id.toString() === id.toString());
   return job || null;
 };
 
 // Toggle favorite status for a job
-export const toggleFavoriteJob = async (jobId: string | number): Promise<boolean> => {
+export const toggleFavoriteJob = async (
+  jobId: string | number
+): Promise<boolean> => {
   const jobIdStr = jobId.toString();
   const current = getFavoriteJobIds();
   let newFavoriteJobs: string[];
   let newState: boolean;
-  
+
   if (current.includes(jobIdStr)) {
     // Remove from favorites
-    newFavoriteJobs = current.filter(id => id !== jobIdStr);
+    newFavoriteJobs = current.filter((id) => id !== jobIdStr);
     newState = false;
   } else {
     // Add to favorites
     newFavoriteJobs = [jobIdStr, ...current];
     newState = true;
   }
-  
+
   // Update localStorage
-  localStorage.setItem('favoriteJobIds', JSON.stringify(newFavoriteJobs));
-  
+  localStorage.setItem("favoriteJobIds", JSON.stringify(newFavoriteJobs));
+
   // Add debug log
-  console.log(`jobService: Dispatching favoritesUpdated event for job ${jobIdStr}, isFavorite=${newState}`);
-  
+  console.log(
+    `jobService: Dispatching favoritesUpdated event for job ${jobIdStr}, isFavorite=${newState}`
+  );
+
   // Dispatch a custom event to notify other components of the change
-  window.dispatchEvent(new CustomEvent('favoritesUpdated', { 
-    detail: { jobId: jobIdStr, isFavorite: newState }
-  }));
-  
+  window.dispatchEvent(
+    new CustomEvent("favoritesUpdated", {
+      detail: { jobId: jobIdStr, isFavorite: newState },
+    })
+  );
+
   return newState;
 };
 
 // Get favorite job IDs from localStorage
 export const getFavoriteJobIds = (): string[] => {
-  const stored = localStorage.getItem('favoriteJobIds');
+  const stored = localStorage.getItem("favoriteJobIds");
   return stored ? JSON.parse(stored) : [];
 };
 
@@ -174,26 +185,30 @@ export const getFavoriteJobs = async (): Promise<Job[]> => {
   const allJobs = await fetchJobs();
   const favIds = getFavoriteJobIds();
   console.log("getFavoriteJobs: Current favorite IDs:", favIds);
-  return allJobs.filter(job => favIds.includes(job.id.toString())).map(job => ({
-    ...job,
-    isFavorite: true
-  }));
+  return allJobs
+    .filter((job) => favIds.includes(job.id.toString()))
+    .map((job) => ({
+      ...job,
+      isFavorite: true,
+    }));
 };
 
 // Fetch jobs by category
 export const fetchJobsByCategory = async (category: string): Promise<Job[]> => {
   try {
     const allJobs = await fetchJobs();
-    if (category === 'all') {
-     return allJobs;
+    if (category === "all") {
+      return allJobs;
     }
-    return allJobs.filter(job => job.category === category || job.employmentType === category);
+    return allJobs.filter(
+      (job) => job.category === category || job.employmentType === category
+    );
   } catch (error) {
-    console.error('Error fetching jobs by category:', error);
-  return [];
-}
+    console.error("Error fetching jobs by category:", error);
+    return [];
+  }
 };
 
 const setFavoriteJobIds = (ids: string[]) => {
-  localStorage.setItem('favoriteJobIds', JSON.stringify(ids));
+  localStorage.setItem("favoriteJobIds", JSON.stringify(ids));
 };
