@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -28,8 +29,9 @@ const JobCard: React.FC<JobCardProps> = ({
   onClick,
   onFavoriteClick
 }) => {
-  const [isFavoriteState, setIsFavoriteState] = useState(isJobFavorite(id));
-
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
+  
+  // 컴포넌트 마운트 시와 id가 변경될 때마다 즐겨찾기 상태 확인
   useEffect(() => {
     setIsFavoriteState(isJobFavorite(id));
   }, [id]);
@@ -37,7 +39,11 @@ const JobCard: React.FC<JobCardProps> = ({
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await toggleFavoriteJob(id);
-    setIsFavoriteState(isJobFavorite(id));
+    
+    // 토글 후 상태를 다시 확인하여 UI 업데이트
+    const newFavoriteState = isJobFavorite(id);
+    setIsFavoriteState(newFavoriteState);
+    
     if (onFavoriteClick) {
       onFavoriteClick(id);
     }
@@ -68,6 +74,7 @@ const JobCard: React.FC<JobCardProps> = ({
       <button
         onClick={handleFavoriteClick}
         className="absolute top-4 left-4 hover:scale-110 transition"
+        aria-label={isFavoriteState ? "관심 공고에서 제거" : "관심 공고에 추가"}
       >
         <Star
           size={24}
