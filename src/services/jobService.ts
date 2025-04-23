@@ -3,10 +3,6 @@ import { Job } from '@/types/job';
 import { EducationProgram } from '@/types/job';
 import { fetchJobsFromDB } from './supabaseClient';
 
-// const JOB_API = 'http://localhost:3001/api/jobs';
-// const EDUCATION_API = 'http://localhost:3001/api/educations';
-const EDUCATION_API = 'https://api.example.com/educations'; // Using a placeholder URL
-
 // Convert DB job entry to our Job format
 const convertDBJobToJobFormat = (dbJob: any): Job => {
 const locationMatch = dbJob.work_location?.match(/서울특별시\s*([^\s]+구)/);
@@ -132,12 +128,14 @@ export const getJobById = async (id: string | number): Promise<Job | null> => {
 };
 
 // Toggle favorite status for a job (client-side only for now)
-export const toggleFavoriteJob = async (jobId: string | number): Promise<Job[]> => {
-  const allJobs = await fetchJobs();
-  const updatedJobs = allJobs.map(job =>
-  job.id.toString() === jobId.toString() ? { ...job, isFavorite: !job.isFavorite } : job
-);
-return updatedJobs;
+export const toggleFavoriteJob = async (jobId: string | number): Promise<void> => {
+  const jobIdStr = jobId.toString();
+  const current = getFavoriteJobIds();
+  if (current.includes(jobIdStr)) {
+    setFavoriteJobIds(current.filter(id => id !== jobIdStr));
+  } else {
+    setFavoriteJobIds([jobIdStr, ...current]);
+  }
 };
 
 // Get favorite job IDs from localStorage
@@ -155,7 +153,8 @@ export const isJobFavorite = (jobId: string | number): boolean => {
 // Get only favorite jobs (client-side filtering)
 export const getFavoriteJobs = async (): Promise<Job[]> => {
   const allJobs = await fetchJobs();
-  return allJobs.filter(job => job.isFavorite);
+  const favIds = getFavoriteJobIds();
+  return allJobs.filter(job => favIds.includes(job.id.toString()));
 };
 
 // Fetch jobs by category
@@ -170,4 +169,8 @@ export const fetchJobsByCategory = async (category: string): Promise<Job[]> => {
     console.error('Error fetching jobs by category:', error);
   return [];
 }
+};
+
+const setFavoriteJobIds = (ids: string[]) => {
+  localStorage.setItem('favoriteJobIds', JSON.stringify(ids));
 };

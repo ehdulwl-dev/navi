@@ -58,8 +58,6 @@ const Index = () => {
 
   const handleFavoriteToggle = async (jobId: string | number) => {
     await toggleFavoriteJob(jobId);
-    await queryClient.invalidateQueries({ queryKey: ["jobs"] });
-    refetch();
   };
 
   const handleFilterChange = (
@@ -157,7 +155,6 @@ const Index = () => {
   );
 };
 
-// ✅ 탭 버튼 분리
 const TabButton = ({
   label,
   active,

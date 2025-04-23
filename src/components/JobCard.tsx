@@ -28,7 +28,7 @@ const JobCard: React.FC<JobCardProps> = ({
   onClick,
   onFavoriteClick
 }) => {
-  const [isFavoriteState, setIsFavoriteState] = useState(isFavorite);
+  const [isFavoriteState, setIsFavoriteState] = useState(isJobFavorite(id));
 
   useEffect(() => {
     setIsFavoriteState(isJobFavorite(id));
@@ -37,7 +37,7 @@ const JobCard: React.FC<JobCardProps> = ({
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await toggleFavoriteJob(id);
-    setIsFavoriteState(prev => !prev);
+    setIsFavoriteState(isJobFavorite(id));
     if (onFavoriteClick) {
       onFavoriteClick(id);
     }
@@ -77,7 +77,6 @@ const JobCard: React.FC<JobCardProps> = ({
           )}
         />
       </button>
-
       <div className="flex justify-between items-start pl-8">
         <div>
           <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
