@@ -6,7 +6,7 @@ const BottomNavigation: React.FC = () => {
   const path = location.pathname;
 
   const navItems = [
-    { path: "/", label: "홈", icon: "home" },
+    { path: "/index", label: "홈", icon: "home" },
     { path: "/favorites", label: "관심 공고", icon: "star" },
     { path: "/cover-letter", label: "자기소개서", icon: "ai" },
     { path: "/resume", label: "이력서", icon: "resume" },

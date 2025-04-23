@@ -98,11 +98,13 @@ const Index = () => {
     <div className="bg-white min-h-screen">
       <header className="pt-5 px-5">
         <div className="flex justify-center">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/6bb4f7ec5b45888b3e493a8729d13e4ef11c4dee"
-            className="w-16 h-auto object-contain"
-            alt="Logo"
-          />
+          <a>
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/6bb4f7ec5b45888b3e493a8729d13e4ef11c4dee"
+              className="w-16 h-auto object-contain"
+              alt="Logo"
+            />
+          </a>
         </div>
 
         <div className="flex mt-6 min-h-14 rounded-full border-2 border-app-blue bg-white px-6 py-3 items-center">

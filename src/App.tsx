@@ -20,6 +20,8 @@ import { Toaster } from "sonner";
 import ResumeTemplate from "./pages/ResumeTemplate";
 import CoverLetterPreview from "./pages/CoverLetterPreview";
 
+import LoginHome from "./pages/LoginHome";
+
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -36,7 +38,8 @@ const App: React.FC = () => {
         {/* <Sonner /> */}
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<LoginHome />} />
+            <Route path="/index" element={<Index />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/apply" element={<Apply />} />
@@ -44,6 +47,7 @@ const App: React.FC = () => {
             <Route path="/resume/create" element={<ResumeForm />} />
             <Route path="/resume/edit/:id" element={<ResumeForm />} />
             <Route path="/cover-letter" element={<CoverLetter />} />
+            
             <Route
               path="/cover-letter/ai-create"
               element={<CoverLetterAIForm />}

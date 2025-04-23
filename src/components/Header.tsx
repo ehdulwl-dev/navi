@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-white py-4 px-4 border-b">
       <div className="flex justify-center mb-6">
-        <Link to="/">
+        <Link to="/index">
           <img src="/Navi-linear-logo.svg" alt="Navi Logo" className="h-6" />
         </Link>
       </div>
