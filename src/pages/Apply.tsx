@@ -34,7 +34,10 @@ const Apply = () => {
   }, []);
 
   const handleToggleFavorite = async (jobId: number) => {
-    const updatedJobs = await toggleFavoriteJob(jobId);
+    // Modified to manually update the UI state after toggling favorites
+    await toggleFavoriteJob(jobId);
+    // Refresh jobs to update UI with latest favorite status
+    const updatedJobs = await fetchJobs();
     setJobs(updatedJobs);
   };
 

@@ -1,7 +1,11 @@
+
 import axios from 'axios';
 import { Job } from '@/types/job';
 import { EducationProgram } from '@/types/job';
 import { fetchJobsFromDB } from './supabaseClient';
+
+// Add the missing constant
+const EDUCATION_API = 'https://api.example.com/educations'; // Placeholder URL
 
 // Convert DB job entry to our Job format
 const convertDBJobToJobFormat = (dbJob: any): Job => {

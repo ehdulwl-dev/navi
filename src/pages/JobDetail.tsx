@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Briefcase, Star } from "lucide-react";
 import { Job } from "../components/JobList";
-import { getJobById, toggleFavoriteJob } from "../services/jobService";
+import { getJobById, toggleFavoriteJob, isJobFavorite } from "../services/jobService";
 import { getMockMatchAnalysis } from "../services/matchingService";
 import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -51,14 +51,16 @@ const JobDetail: React.FC = () => {
 
   const handleToggleFavorite = async () => {
     if (!job) return;
-    try {
-      const updatedJobs = await toggleFavoriteJob(job.id);
-      const updatedJob = updatedJobs.find((j) => j.id === job.id);
-      if (updatedJob) {
-        setJob(updatedJob);
-      }
-    } catch (error) {
-      console.error("관심 공고 토글 실패:", error);
+    
+    await toggleFavoriteJob(job.id);
+    
+    // Update the job's favorite status after toggling
+    const updatedJob = await getJobById(job.id);
+    if (updatedJob) {
+      setJob({
+        ...updatedJob,
+        isFavorite: isJobFavorite(job.id)
+      });
     }
   };
 
