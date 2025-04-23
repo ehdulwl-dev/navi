@@ -77,7 +77,7 @@ const NearbyJobs = () => {
           <Link to="/" className="mr-4">
             <ArrowLeft size={24} />
           </Link>
-          <h1 className="text-xl font-bold">집에서 가까운 모집 공고</h1>
+          <h1 className="text-xl font-bold">가까운 모집 공고</h1>
         </div>
       </header>
 
