@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, StarOff } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 export interface Job {
@@ -22,13 +22,14 @@ export interface Job {
 
 interface JobListProps {
   jobs: Job[];
-  onToggleFavorite: (jobId: string | number, isFavorite: boolean) => void;
+  onToggleFavorite: (jobId: string | number) => void;
   fromFavorites?: boolean;
 }
 
 const JobList: React.FC<JobListProps> = ({ jobs, onToggleFavorite, fromFavorites = false }) => {
   const handleFavoriteToggle = (jobId: string | number, isFavorite: boolean) => {
-    onToggleFavorite(jobId, isFavorite);
+    onToggleFavorite(jobId);
+    toast(isFavorite ? '관심 공고에서 제거되었습니다' : '관심 공고에 추가되었습니다');
   };
 
   return (

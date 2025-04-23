@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +6,6 @@ import JobCard from "../components/JobCard";
 import JobFilters from "../components/JobFilters";
 import RecommendedJobsSection from "../components/RecommendedJobsSection";
 import { fetchJobs, toggleFavoriteJob } from "../services/jobService";
-import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -44,30 +42,9 @@ const Index = () => {
       if (updatedName) setUserName(updatedName);
     };
 
-    // Listen for favorites updates
-    const handleFavoritesUpdated = (event: Event) => {
-      console.log("Index: favoritesUpdated event received");
-      
-      // Refetch jobs to update UI with latest favorite status
-      refetch();
-      
-      // Show toast notifications based on favorite status
-      const detail = (event as CustomEvent)?.detail;
-      if (detail?.isFavorite) {
-        toast.success("관심 공고에 추가되었습니다");
-      } else {
-        toast.info("관심 공고에서 제거되었습니다");
-      }
-    };
-
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-    
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-    };
-  }, [refetch]);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -79,14 +56,8 @@ const Index = () => {
     navigate(`/job/${jobId}`);
   };
 
-  const handleFavoriteToggle = async (jobId: string | number, isFavorite: boolean) => {
-    console.log(`Index: Toggling favorite for job ${jobId}, current state: ${isFavorite}`);
-    
-    // Toggle favorite status
+  const handleFavoriteToggle = async (jobId: string | number) => {
     await toggleFavoriteJob(jobId);
-    
-    // Invalidate the jobs query to refresh the UI
-    queryClient.invalidateQueries({ queryKey: ["jobs"] });
   };
 
   const handleFilterChange = (

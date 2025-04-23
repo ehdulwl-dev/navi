@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Star } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +9,6 @@ import BottomNavigation from "../components/BottomNavigation";
 import { getFavoriteJobs, toggleFavoriteJob } from "../services/jobService";
 import { getMockMatchAnalysis } from "../services/matchingService";
 import Header from "@/components/Header";
-import { toast } from "sonner";
 
 const Favorites = () => {
   const [favoriteJobs, setFavoriteJobs] = useState<Job[]>([]);
@@ -27,7 +25,10 @@ const Favorites = () => {
     navigate('/', { state: { activeTab: 'all' } });
   };
 
-  // 관심공고 불러오기
+  useEffect(() => {
+    loadFavoriteJobs();
+  }, []);
+
   const loadFavoriteJobs = async () => {
     try {
       setLoading(true);
@@ -47,34 +48,6 @@ const Favorites = () => {
     }
   };
 
-  useEffect(() => {
-    // Initial load of favorite jobs
-    loadFavoriteJobs();
-
-    // 리스트 동기화 (별 클릭시 이벤트)
-    const handleFavoritesUpdated = (event: Event) => {
-      console.log("Favorites tab: favoritesUpdated event received");
-      
-      // Important: Force reload of favorite jobs when event is triggered
-      loadFavoriteJobs();
-      
-      // Show toast notification
-      const detail = (event as CustomEvent)?.detail;
-      if (detail?.isFavorite) {
-        toast.success("관심 공고에 추가되었습니다");
-      } else {
-        toast.info("관심 공고에서 제거되었습니다");
-      }
-    };
-
-    // Global event listener
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-
-    return () => {
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-    };
-  }, []);
-
   const handleRefresh = () => {
     setRefreshing(true);
     loadFavoriteJobs();
@@ -83,15 +56,14 @@ const Favorites = () => {
     }, 1000);
   };
 
-  // 별(관심) 클릭 핸들러
-  const handleToggleFavorite = async (jobId: string | number, isFavorite: boolean) => {
-    console.log(`Favorites: Toggling favorite for job ${jobId}, current state: ${isFavorite}`);
-    
-    // toggleFavoriteJob 비동기 호출 후 갱신
-    await toggleFavoriteJob(jobId);
-    
-    // 즉시 목록 갱신
-    await loadFavoriteJobs();
+  const handleToggleFavorite = (jobId: string | number) => {
+    toggleFavoriteJob(jobId);
+    setFavoriteJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
+    setJobScores((prevScores) => {
+      const newScores = { ...prevScores };
+      delete newScores[jobId];
+      return newScores;
+    });
   };
 
   const filteredJobs = searchQuery
@@ -112,7 +84,6 @@ const Favorites = () => {
         title="관심 공고"
         refreshing={refreshing}
         onBack={handleBack}
-        onRefresh={handleRefresh}
       />
 
       <main className="px-4 py-2">
@@ -144,7 +115,7 @@ const Favorites = () => {
                 </Link>
                 <button
                   className="absolute top-1/2 -translate-y-1/2 left-3"
-                  onClick={() => handleToggleFavorite(job.id, true)}
+                  onClick={() => handleToggleFavorite(job.id)}
                   aria-label="관심 공고에서 제거"
                 >
                   <Star
