@@ -14,7 +14,6 @@ import JobInfo from "../components/job/JobInfo";
 import JobDescription from "../components/job/JobDescription";
 import ApplyDialog from "../components/job/ApplyDialog";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 const JobDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +25,6 @@ const JobDetail: React.FC = () => {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [matchScore, setMatchScore] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
-  const [isFavorite, setIsFavorite] = useState(false);
   const fromFavorites = location.state?.fromFavorites || false;
 
   useEffect(() => {
@@ -35,15 +33,7 @@ const JobDetail: React.FC = () => {
       setLoading(true);
       try {
         const fetchedJob = await getJobById(id);
-        if (fetchedJob) {
-          // 관심 공고 상태 확인
-          const favorite = isJobFavorite(id);
-          setIsFavorite(favorite);
-          setJob({
-            ...fetchedJob,
-            isFavorite: favorite
-          });
-        }
+        setJob(fetchedJob);
 
         if (fromFavorites) {
           const analysis = getMockMatchAnalysis(id);
@@ -63,15 +53,15 @@ const JobDetail: React.FC = () => {
     if (!job) return;
     
     await toggleFavoriteJob(job.id);
-    const newFavoriteState = isJobFavorite(job.id);
-    setIsFavorite(newFavoriteState);
-    setJob({
-      ...job,
-      isFavorite: newFavoriteState
-    });
     
-    // 사용자에게 알림
-    toast(newFavoriteState ? "관심 공고에 추가되었습니다" : "관심 공고에서 제거되었습니다");
+    // Update the job's favorite status after toggling
+    const updatedJob = await getJobById(job.id);
+    if (updatedJob) {
+      setJob({
+        ...updatedJob,
+        isFavorite: isJobFavorite(job.id)
+      });
+    }
   };
 
   const handleCreateCoverLetter = () => {
@@ -168,12 +158,12 @@ const JobDetail: React.FC = () => {
             onClick={handleToggleFavorite}
             className={cn(
               "rounded-full transition-colors",
-              isFavorite 
+              job?.isFavorite 
                 ? "bg-[#FFE376] text-black" 
                 : "text-gray-500 hover:bg-[#FFE376] hover:text-black"
             )}
           >
-            <Star fill={isFavorite ? "currentColor" : "none"} />
+            <Star fill={job?.isFavorite ? "currentColor" : "none"} />
           </Button>
           <Button
             className="flex-1 py-3 text-lg font-medium bg-[#FFE376] hover:bg-[#FFE376] text-black"

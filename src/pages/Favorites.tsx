@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Star } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +9,6 @@ import BottomNavigation from "../components/BottomNavigation";
 import { getFavoriteJobs, toggleFavoriteJob } from "../services/jobService";
 import { getMockMatchAnalysis } from "../services/matchingService";
 import Header from "@/components/Header";
-import { toast } from "sonner";
 
 const Favorites = () => {
   const [favoriteJobs, setFavoriteJobs] = useState<Job[]>([]);
@@ -58,12 +56,14 @@ const Favorites = () => {
     }, 1000);
   };
 
-  const handleToggleFavorite = async (jobId: string | number) => {
-    await toggleFavoriteJob(jobId);
-    // 즐겨찾기 해제 후 목록에서 바로 제거
+  const handleToggleFavorite = (jobId: string | number) => {
+    toggleFavoriteJob(jobId);
     setFavoriteJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
-    // 사용자에게 알림
-    toast("관심 공고에서 제거되었습니다");
+    setJobScores((prevScores) => {
+      const newScores = { ...prevScores };
+      delete newScores[jobId];
+      return newScores;
+    });
   };
 
   const filteredJobs = searchQuery
@@ -83,7 +83,6 @@ const Favorites = () => {
       <Header
         title="관심 공고"
         refreshing={refreshing}
-        onRefresh={handleRefresh}
         onBack={handleBack}
       />
 
