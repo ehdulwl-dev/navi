@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ interface JobCardProps {
   deadline?: string;
   isFavorite?: boolean;
   onClick?: () => void;
-  onFavoriteClick?: (id: string | number) => void;
+  onFavoriteClick?: (id: string | number, isFavorite: boolean) => void;
 }
 
 const JobCard: React.FC<JobCardProps> = ({
@@ -28,18 +29,31 @@ const JobCard: React.FC<JobCardProps> = ({
   onClick,
   onFavoriteClick
 }) => {
-  const [isFavoriteState, setIsFavoriteState] = useState(isJobFavorite(id));
+  // Initialize with both passed prop and actual storage state
+  const [isFavoriteState, setIsFavoriteState] = useState<boolean>(
+    isFavorite || isJobFavorite(id)
+  );
 
+  // Update state when props change
   useEffect(() => {
-    setIsFavoriteState(isJobFavorite(id));
-  }, [id]);
+    setIsFavoriteState(isFavorite || isJobFavorite(id));
+  }, [id, isFavorite]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await toggleFavoriteJob(id);
-    setIsFavoriteState(isJobFavorite(id));
+    
+    // Toggle favorite in storage and get new state
+    const newFavoriteState = await toggleFavoriteJob(id);
+    
+    // Update local state
+    setIsFavoriteState(newFavoriteState);
+    
+    // Log for debugging
+    console.log(`JobCard: Toggled job ${id} favorite status to ${newFavoriteState}`);
+    
+    // Notify parent component
     if (onFavoriteClick) {
-      onFavoriteClick(id);
+      onFavoriteClick(id, newFavoriteState);
     }
   };
 
@@ -68,6 +82,7 @@ const JobCard: React.FC<JobCardProps> = ({
       <button
         onClick={handleFavoriteClick}
         className="absolute top-4 left-4 hover:scale-110 transition"
+        aria-label={isFavoriteState ? "관심 공고에서 제거" : "관심 공고에 추가"}
       >
         <Star
           size={24}
