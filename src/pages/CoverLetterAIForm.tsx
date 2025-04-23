@@ -39,6 +39,8 @@ const INITIAL_KEYWORDS: Keyword[] = [
   { id: "10", text: "전문성", selected: false, color: "destructive" },
 ];
 
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"; 
+
 const CoverLetterAIForm = () => {
   const location = useLocation();
   const jobData = location.state || {};
