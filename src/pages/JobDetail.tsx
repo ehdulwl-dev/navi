@@ -1,19 +1,20 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Briefcase, Star } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Job } from "../components/JobList";
-import { getJobById, toggleFavoriteJob, isJobFavorite } from "../services/jobService";
+import {
+  getJobById,
+  toggleFavoriteJob,
+  getFavoriteJobIds,
+} from "../services/jobService";
 import { getMockMatchAnalysis } from "../services/matchingService";
-import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MatchingAnalysis from "../components/MatchingAnalysis";
 import JobHeader from "../components/job/JobHeader";
-import JobInfo from "../components/job/JobInfo";
-import JobDescription from "../components/job/JobDescription";
+import JobTabs from "../components/job/JobTabs";
+import JobActions from "../components/job/JobActions";
 import ApplyDialog from "../components/job/ApplyDialog";
-import { cn } from "@/lib/utils";
+import QualificationQuestionDialog from "../components/matching/QualificationQuestionDialog";
+import BottomNavigation from "../components/BottomNavigation";
 
 const JobDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +26,21 @@ const JobDetail: React.FC = () => {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [matchScore, setMatchScore] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
-  const fromFavorites = location.state?.fromFavorites || false;
+  const [showQualificationDialog, setShowQualificationDialog] = useState(false);
+  const [hasCompletedQuestionnaire, setHasCompletedQuestionnaire] =
+    useState(false);
+  const [isAnalysisReady, setIsAnalysisReady] = useState(false);
+  const [showAnalysisTab, setShowAnalysisTab] = useState(false);
+
+  const shouldShowAnalysis = (
+    job: Job | null,
+    jobId: string | undefined
+  ): boolean => {
+    if (!job || !jobId) return false;
+
+    const favoriteIds = getFavoriteJobIds();
+    return favoriteIds.includes(jobId.toString());
+  };
 
   useEffect(() => {
     const loadJob = async () => {
@@ -35,9 +50,16 @@ const JobDetail: React.FC = () => {
         const fetchedJob = await getJobById(id);
         setJob(fetchedJob);
 
-        if (fromFavorites) {
+        const showAnalysis = shouldShowAnalysis(fetchedJob, id);
+        setShowAnalysisTab(showAnalysis);
+
+        if (showAnalysis) {
           const analysis = getMockMatchAnalysis(id);
           setMatchScore(analysis.totalScore);
+
+          if (location.state?.isAnalysisReady || id.length % 2 === 0) {
+            setIsAnalysisReady(true);
+          }
         }
       } catch (err) {
         console.error("공고 불러오기 실패:", err);
@@ -47,20 +69,29 @@ const JobDetail: React.FC = () => {
     };
 
     loadJob();
-  }, [id, fromFavorites]);
+  }, [id, location.state]);
+
+  useEffect(() => {
+    if (location.search.includes("tab=analysis")) {
+      setActiveTab("analysis");
+    }
+    if (showAnalysisTab) {
+      setActiveTab("analysis");
+    }
+  }, [location.search, id, showAnalysisTab]);
 
   const handleToggleFavorite = async () => {
     if (!job) return;
-    
-    await toggleFavoriteJob(job.id);
-    
-    // Update the job's favorite status after toggling
-    const updatedJob = await getJobById(job.id);
-    if (updatedJob) {
-      setJob({
-        ...updatedJob,
-        isFavorite: isJobFavorite(job.id)
-      });
+    try {
+      const result = await toggleFavoriteJob(job.id);
+
+      const updatedJob = await getJobById(job.id);
+      if (updatedJob) {
+        setJob(updatedJob);
+        setShowAnalysisTab(shouldShowAnalysis(updatedJob, id));
+      }
+    } catch (error) {
+      console.error("관심 공고 토글 실패:", error);
     }
   };
 
@@ -73,6 +104,17 @@ const JobDetail: React.FC = () => {
         },
       });
     }
+  };
+
+  const handleStartAnalysis = () => {
+    setShowQualificationDialog(true);
+  };
+
+  const handleQuestionnaireComplete = (answers: boolean[]) => {
+    setHasCompletedQuestionnaire(true);
+    const analysis = getMockMatchAnalysis(id as string);
+    setMatchScore(analysis.totalScore);
+    setIsAnalysisReady(true);
   };
 
   if (loading) {
@@ -107,7 +149,7 @@ const JobDetail: React.FC = () => {
       <JobHeader job={job} />
 
       <main className="px-4 py-6">
-        {fromFavorites && (
+        {showAnalysisTab && (
           <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
             <div className="inline-block bg-app-light-blue text-app-blue px-3 py-1 rounded-full text-xs mb-2">
               맞춤형 공고 분석
@@ -120,59 +162,28 @@ const JobDetail: React.FC = () => {
           </div>
         )}
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-4"
-        >
-          <TabsList className="w-full">
-            <TabsTrigger value="info" className="flex-1">
-              공고 정보
-            </TabsTrigger>
-            {fromFavorites && (
-              <TabsTrigger value="analysis" className="flex-1">
-                맞춤형 분석
-              </TabsTrigger>
-            )}
-          </TabsList>
+        <JobTabs
+          job={job}
+          fromFavorites={showAnalysisTab}
+          activeTab={activeTab}
+          hasCompletedQuestionnaire={hasCompletedQuestionnaire}
+          isAnalysisReady={isAnalysisReady}
+          matchAnalysis={getMockMatchAnalysis(id as string)}
+          onTabChange={setActiveTab}
+          onStartAnalysis={handleStartAnalysis}
+        />
 
-          <TabsContent value="info" className="space-y-4">
-            <JobInfo job={job} />
-            <JobDescription job={job} />
-          </TabsContent>
+        <QualificationQuestionDialog
+          open={showQualificationDialog}
+          onOpenChange={setShowQualificationDialog}
+          onComplete={handleQuestionnaireComplete}
+        />
 
-          {fromFavorites && (
-            <TabsContent value="analysis">
-              <MatchingAnalysis
-                analysis={getMockMatchAnalysis(id as string)}
-                onBack={() => setActiveTab("info")}
-              />
-            </TabsContent>
-          )}
-        </Tabs>
-
-        <div className="fixed bottom-[72px] left-0 right-0 p-4 bg-white border-t border-gray-100 flex gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleToggleFavorite}
-            className={cn(
-              "rounded-full transition-colors",
-              job?.isFavorite 
-                ? "bg-[#FFE376] text-black" 
-                : "text-gray-500 hover:bg-[#FFE376] hover:text-black"
-            )}
-          >
-            <Star fill={job?.isFavorite ? "currentColor" : "none"} />
-          </Button>
-          <Button
-            className="flex-1 py-3 text-lg font-medium bg-[#FFE376] hover:bg-[#FFE376] text-black"
-            onClick={() => setShowApplyDialog(true)}
-          >
-            <Briefcase className="ml-2" />
-            지원하기
-          </Button>
-        </div>
+        <JobActions
+          isFavorite={job.isFavorite}
+          onToggleFavorite={handleToggleFavorite}
+          onApplyClick={() => setShowApplyDialog(true)}
+        />
       </main>
 
       <ApplyDialog
