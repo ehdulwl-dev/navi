@@ -38,7 +38,7 @@ const Profile = () => {
     desiredJob: "바리스타",
     desiredLocation: "서울시",
     desiredWorkingHours: "평일 가능",
-    personality: "차분함"
+    personality: "차분함",
   });
 
   // 전체 섹션 편집 상태 관리
