@@ -4,7 +4,7 @@ import { EducationProgram } from "@/types/job";
 import { fetchJobsFromDB } from "./supabaseClient";
 
 // Add the missing constant
-const EDUCATION_API = "http://localhost:3001/api/educations";
+const EDUCATION_API = "http://localhost:3001/api/educations"; // Placeholder URL
 
 // Convert DB job entry to our Job format
 const convertDBJobToJobFormat = (dbJob: any): Job => {
@@ -109,7 +109,6 @@ export const getJobsByType = async (type: string): Promise<Job[]> => {
 export const getEducationData = async (): Promise<EducationProgram[]> => {
   try {
     const res = await axios.get<EducationProgram[]>(EDUCATION_API);
-    console.log("교육 응답:", res.data);
     return res.data;
   } catch (error) {
     console.error("Error fetching education data:", error);
